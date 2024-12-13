@@ -1,102 +1,85 @@
 // components/GridComponent.tsx
 'use client';
 
-import { AgGridReact } from "ag-grid-react";
-import { useCallback, useState } from "react";
-import { ColDef, GridReadyEvent } from "ag-grid-community";
-import { IServerSideDatasource, IServerSideGetRowsParams, ModuleRegistry, IServerSideGetRowsRequest } from "@ag-grid-community/core";
-import { ServerSideRowModelModule } from "@ag-grid-enterprise/server-side-row-model";
-import "ag-grid-community/styles/ag-grid.css"; 
-import "ag-grid-community/styles/ag-theme-quartz.css"; 
-
-import 'ag-grid-enterprise'; // Import the Enterprise features
-// import { LicenseManager } from "ag-grid-enterprise";
+import dynamic from 'next/dynamic';
+import { useEffect, useMemo, useState } from 'react';
+import type { ColDef } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import 'ag-grid-enterprise';
+import { ContextMenuModule, IntegratedChartsModule } from 'ag-grid-enterprise';
+import { AgChartsEnterpriseModule } from 'ag-charts-enterprise';
 
 // Set your license key here
-// LicenseManager.setLicenseKey(process.env.NEXT_PUBLIC_AG_GRID_LICENSE_KEY || "");
+// LicenseManager.setLicenseKey(process.env.NEXT_PUBLIC_AG_GRID_LICENSE_KEY || '');
 
-ModuleRegistry.registerModules([ServerSideRowModelModule]);
+// Dynamically import AgGridReact with SSR disabled
+const AgGridReact = dynamic(
+  () => import('ag-grid-react').then((mod) => mod.AgGridReact),
+  { ssr: false }
+);
 
-// Create a datasource that uses the /api/fakeServer endpoint
-const getServerSideDatasource = (): IServerSideDatasource => {
-  return {
-    async getRows(params: IServerSideGetRowsParams) {
-      console.log("[Datasource] - rows requested by grid: ", params.request);
-      
-      try {
-        const response = await fetch('/api/fake-server', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(params.request as IServerSideGetRowsRequest),
-        });
-        
-        if (!response.ok) {
-          console.error("Failed to fetch data from server");
-          params.fail();
-          return;
-        }
-
-        const data = await response.json();
-        console.log("[Datasource] - rows returned from server: ", data);
-        
-        if (data.success) {
-          params.success({
-            rowData: data.rows,
-            rowCount: data.lastRow,
-          });
-        } else {
-          params.fail();
-        }
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-        params.fail();
-      }
-    }
-  };
-};
+ModuleRegistry.registerModules([
+  AllCommunityModule,
+  ContextMenuModule,
+  IntegratedChartsModule.with(AgChartsEnterpriseModule),
+]);
 
 const GridComponent = () => {
-    const [columnDefs] = useState<ColDef[]>([
-        { 
-          field: "athlete", 
-          filter: "agTextColumnFilter",
-          editable: true,
-          onCellValueChanged: (event) => {
-            console.log("Cell changed:", event.data);
-          }
-        },
-        { field: "age", filter: "agNumberColumnFilter" },
-        { field: "date", filter: "agDateColumnFilter" },
-        { field: "country", sortable: false},
-        { field: "sport"},
-        { field: "gold"},
-        { field: "silver"},
-        { field: "bronze"},
-        { field: "total"},
-    ]);
+  const [rowData, setRowData] = useState<any[]>([]);
 
-    const onGridReady = useCallback((params: GridReadyEvent) => {
-        console.log("Grid ready event received");
-        const datasource = getServerSideDatasource();
-        // Register the datasource with the grid
-        params.api!.setGridOption("serverSideDatasource", datasource as any);
-    }, []);
+  const [columnDefs, setColumnDefs] = useState<ColDef[]>([
+    {
+      field: 'athlete',
+      filter: 'agTextColumnFilter',
+      editable: true,
+      onCellValueChanged: (event) => {
+        console.log(event.data);
+        // Handle the cell value change event
+        // Here, you can update the data in the server or perform any other action
+      },
+    },
+    { field: 'age', filter: true },
+    { field: 'date', resizable: false, filter: 'agDateColumnFilter' },
+    { field: 'country', sortable: false },
+    { field: 'sport' },
+    { field: 'gold' },
+    { field: 'silver' },
+    { field: 'bronze' },
+    { field: 'total' },
+  ]);
 
-    return (
-        <div
-          className="ag-theme-quartz-dark"
-          style={{ height: 750 }}
-        >
-          <AgGridReact
-            columnDefs={columnDefs}
-            enableCharts={true}
-            rowSelection="multiple"
-            cellSelection={true}
-            rowModelType={"serverSide"}
-            onGridReady={onGridReady}
-          />
-        </div>
-    );
+  const defaultColDef = {
+    resizable: true,
+  };
+
+  useEffect(() => {
+    fetch('https://www.ag-grid.com/example-assets/olympic-winners.json') // Fetch data from server
+      .then((result) => result.json()) // Convert to JSON
+      .then((rowData) => setRowData(rowData)); // Update state of `rowData`
+  }, []);
+
+  const pagination = useMemo(() => {
+    return {
+      pagination: true,
+      paginationPageSize: 10,
+      paginationPageSizeSelector: [10, 20, 30, 40, 50],
+    };
+  }, []);
+
+  return (
+    <div style={{ width: '100%', height: '100vh' }}>
+      <AgGridReact
+        rowData={rowData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        enableCharts={true} // Enable the Charting features
+        cellSelection={true}
+        rowSelection={{
+          mode: 'multiRow',
+        }}
+      />
+    </div>
+  );
 };
 
 export default GridComponent;

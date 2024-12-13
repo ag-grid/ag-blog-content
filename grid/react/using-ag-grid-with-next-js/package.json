@@ -9,14 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ag-grid-enterprise/server-side-row-model": "^32.3.3",
-    "ag-charts-react": "^10.3.3",
-    "ag-grid-community": "^32.3.3",
-    "ag-grid-enterprise": "^32.3.3",
-    "ag-grid-react": "^32.3.3",
     "next": "15.0.3",
     "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106"
+    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "ag-grid-community": "33.0.1",
+    "ag-grid-enterprise": "33.0.1",
+    "ag-charts-enterprise": "11.0.0",
+    "ag-grid-react": "33.0.1",
+    "ag-charts-react": "11.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
