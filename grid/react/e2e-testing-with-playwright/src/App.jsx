@@ -17,7 +17,7 @@ function App() {
 
   // Column Definitions: Defines & controls grid columns.
   const [colDefs, setColDefs] = useState([
-    { field: "make", editable: true },
+    { field: "make", editable: true, filter: true },
     { field: "model" },
     { field: "price", editable: true },
     { field: "electric" },
