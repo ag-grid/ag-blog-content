@@ -6,7 +6,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 function App() {
 
-  const [rowData, setRowData] = useState(null);
+  const [rowData, setRowData] = useState<any>(null);
 
   useEffect(() => {
     // Simulate an asynchronous data fetch (e.g., from an API)
