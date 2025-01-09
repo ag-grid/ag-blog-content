@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 
@@ -32,7 +32,11 @@ function App() {
     { field: "electric" },
   ]);
 
-  const [defaultColDef, setDefaultColDef] = useState({ flex: 1 });
+  const defaultColDef = useMemo(() => { 
+    return {
+      flex: 1
+    };
+  }, []);
 
   // Container: Defines the grid's theme & dimensions.
   return (

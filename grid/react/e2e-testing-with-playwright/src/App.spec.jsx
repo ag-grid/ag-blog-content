@@ -139,21 +139,25 @@ test('should allow keyboard navigation and focus within the grid',
   
 
 // Test for loading data asynchronously and displaying it in the grid
-test("should load data asynchronously and display it in the grid", 
+test("should load data asynchronously and display it in the grid",
 	async ({ mount, page }) => {
 		// 1. Mount the component
 		const component = await mount(<App />);
 
 		// 2. Check that the default AG Grid loading overlay is visible.
 		//    By default, it has the class 'ag-overlay-loading-center'.
-		await expect(component.locator(".ag-overlay-loading-center")).toBeVisible();
+		await expect(
+			component.locator(".ag-overlay-loading-center")
+		).toBeVisible();
 
-		// 3. Wait for the AG Grid root to appear - meaning data has loaded
-		await expect(component.locator(".ag-root")).toBeVisible();
-
-		// 4. Check if the first cell contains "Tesla"
+		// 3. Check if the first cell contains "Tesla"
 		//    This confirms that row data has been rendered.
 		const firstCell = component.locator(".ag-cell").first();
 		await expect(firstCell).toHaveText("Tesla");
+
+		// 4. Check that the loading overlay is no longer visible
+		await expect(
+			component.locator(".ag-overlay-loading-center")
+		).not.toBeVisible();
 	}
 );
