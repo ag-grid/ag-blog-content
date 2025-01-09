@@ -3,14 +3,14 @@
 
 import { AgGridReact } from 'ag-grid-react';
 import { useEffect, useMemo, useState } from 'react';
-import type { ColDef } from 'ag-grid-community';
+import type { ColDef, RowSelectionOptions } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import 'ag-grid-enterprise';
-import { ContextMenuModule, IntegratedChartsModule } from 'ag-grid-enterprise';
+import { ContextMenuModule, IntegratedChartsModule, LicenseManager } from 'ag-grid-enterprise';
 import { AgChartsEnterpriseModule } from 'ag-charts-enterprise';
 
 // Set your license key here
-// LicenseManager.setLicenseKey(process.env.NEXT_PUBLIC_AG_GRID_LICENSE_KEY || '');
+LicenseManager.setLicenseKey(process.env.NEXT_PUBLIC_AG_GRID_LICENSE_KEY || '');
 
 ModuleRegistry.registerModules([
   AllCommunityModule,
@@ -60,6 +60,12 @@ const GridComponent = () => {
     };
   }, []);
 
+  const rowSelection = useMemo(() => { 
+    return {
+      mode: 'multiRow',
+    };
+  }, []);
+
   return (
     <div style={{ width: '100%', height: '100vh' }}>
       <AgGridReact
@@ -68,9 +74,7 @@ const GridComponent = () => {
         defaultColDef={defaultColDef}
         enableCharts={true} // Enable the Charting features
         cellSelection={true}
-        rowSelection={{
-          mode: 'multiRow',
-        }}
+        rowSelection={rowSelection as RowSelectionOptions}
       />
     </div>
   );

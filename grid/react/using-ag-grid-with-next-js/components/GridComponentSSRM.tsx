@@ -98,7 +98,7 @@ const GridComponentSSRM = () => {
     resizable: true,
   });
 
-  const [rowSelection, setRowSelection] = useState({ mode: 'multiple'});
+  const [rowSelection, setRowSelection] = useState<'multiple' | 'single'>('multiple');
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
     console.log('Grid ready event received');
@@ -114,7 +114,7 @@ const GridComponentSSRM = () => {
         defaultColDef={defaultColDef}
         enableCharts={true} // Enable the Charting features
         cellSelection={true}
-        rowSelection={{ ...rowSelection}}
+        rowSelection={rowSelection}
         rowModelType={'serverSide'}
         cacheBlockSize={50}
         onGridReady={onGridReady}
