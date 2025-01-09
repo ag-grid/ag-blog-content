@@ -1,19 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function App() {
-  // Row Data: The data to be displayed.
-  const [rowData, setRowData] = useState([
-    { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-    { make: "Ford", model: "F-Series", price: 33850, electric: false },
-    { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-    { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-    { make: "Fiat", model: "500", price: 15774, electric: false },
-    { make: "Nissan", model: "Juke", price: 20675, electric: false },
-  ]);
+
+  const [rowData, setRowData] = useState(null);
+
+  useEffect(() => {
+    // Simulate an asynchronous data fetch (e.g., from an API)
+    const timer = setTimeout(() => {
+      setRowData([
+        { make: "Tesla", model: "Model Y", price: 64950, electric: true },
+        { make: "Ford", model: "F-Series", price: 33850, electric: false },
+        { make: "Toyota", model: "Corolla", price: 29600, electric: false },
+        { make: "Mercedes", model: "EQA", price: 48890, electric: true },
+        { make: "Fiat", model: "500", price: 15774, electric: false },
+        { make: "Nissan", model: "Juke", price: 20675, electric: false },
+      ]);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Column Definitions: Defines & controls grid columns.
   const [colDefs, setColDefs] = useState([

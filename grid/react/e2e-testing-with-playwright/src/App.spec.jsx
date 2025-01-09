@@ -55,7 +55,7 @@ test('should sort "Make" column ascending and then descending',
 });
 
 
-test('should allow editing of editable cells and update the data correctly', 
+test('should allow editing of editable cells and update the data correctly',
     async ({ mount }) => {
         // 1. Mount the component
         const component = await mount(<App />);
@@ -75,7 +75,7 @@ test('should allow editing of editable cells and update the data correctly',
         await priceInput.fill(newPrice);
         // Simulate pressing Enter to save the change
         await priceInput.press('Enter');
-        
+
         // 5. Verify the cell displays the updated value
         await expect(priceCell).toHaveText(newPrice);
     }
@@ -109,4 +109,23 @@ test('should filter data by "Make" using the column filter menu',
         await expect(makeCell).toHaveText('Tesla');
     }
 );
-  
+
+// Test for loading data asynchronously and displaying it in the grid
+test("should load data asynchronously and display it in the grid", 
+    async ({ mount, page }) => {
+        // 1. Mount the component
+        const component = await mount(<App />);
+
+        // 2. Check that the default AG Grid loading overlay is visible.
+        //    By default, it has the class 'ag-overlay-loading-center'.
+        await expect(component.locator(".ag-overlay-loading-center")).toBeVisible();
+
+        // 3. Wait for the AG Grid root to appear - meaning data has loaded
+        await expect(component.locator(".ag-root")).toBeVisible();
+
+        // 4. Check if the first cell contains "Tesla"
+        //    This confirms that row data has been rendered.
+        const firstCell = component.locator(".ag-cell").first();
+        await expect(firstCell).toHaveText("Tesla");
+    }
+);
