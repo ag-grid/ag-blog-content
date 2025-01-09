@@ -1,3 +1,4 @@
+import React from 'react';
 import { test, expect } from '@playwright/experimental-ct-react';
 import App from './App';
 

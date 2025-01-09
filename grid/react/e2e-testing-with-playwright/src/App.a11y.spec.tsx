@@ -1,3 +1,4 @@
+import React from 'react';
 import { test, expect } from '@playwright/experimental-ct-react';
 import { injectAxe, getViolations } from 'axe-playwright';
 import App from './App';
@@ -21,7 +22,7 @@ test('check for accessibility violations',
     const violations = await getViolations(page, '.ag-root', {
       detailedReport: true,
       detailedReportOptions: { html: true },
-    });
+    } as any);
 
     // 5. Check for violations
     expect(violations.length).toBe(0);
