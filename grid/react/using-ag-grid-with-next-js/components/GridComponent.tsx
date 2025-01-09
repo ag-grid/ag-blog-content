@@ -1,7 +1,7 @@
 // components/GridComponent.tsx
 'use client';
 
-import dynamic from 'next/dynamic';
+import { AgGridReact } from 'ag-grid-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { ColDef } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
@@ -11,12 +11,6 @@ import { AgChartsEnterpriseModule } from 'ag-charts-enterprise';
 
 // Set your license key here
 // LicenseManager.setLicenseKey(process.env.NEXT_PUBLIC_AG_GRID_LICENSE_KEY || '');
-
-// Dynamically import AgGridReact with SSR disabled
-const AgGridReact = dynamic(
-  () => import('ag-grid-react').then((mod) => mod.AgGridReact),
-  { ssr: false }
-);
 
 ModuleRegistry.registerModules([
   AllCommunityModule,
@@ -48,9 +42,9 @@ const GridComponent = () => {
     { field: 'total' },
   ]);
 
-  const defaultColDef = {
+  const [defaultColDef, setDefaultColDef] = useState({
     resizable: true,
-  };
+  });
 
   useEffect(() => {
     fetch('https://www.ag-grid.com/example-assets/olympic-winners.json') // Fetch data from server

@@ -1,7 +1,7 @@
 // components/GridComponent.tsx
 'use client';
 
-import dynamic from 'next/dynamic';
+import { AgGridReact } from 'ag-grid-react';
 import { useCallback, useState } from 'react';
 import type {
   ColDef,
@@ -19,18 +19,13 @@ import 'ag-grid-enterprise';
 import {
   ContextMenuModule,
   IntegratedChartsModule,
+  LicenseManager,
   ServerSideRowModelModule,
 } from 'ag-grid-enterprise';
 import { AgChartsEnterpriseModule } from 'ag-charts-enterprise';
 
 // Set your license key here
-// LicenseManager.setLicenseKey(process.env.NEXT_PUBLIC_AG_GRID_LICENSE_KEY || '');
-
-// Dynamically import AgGridReact with SSR disabled
-const AgGridReact = dynamic(
-  () => import('ag-grid-react').then((mod) => mod.AgGridReact),
-  { ssr: false }
-);
+LicenseManager.setLicenseKey(process.env.NEXT_PUBLIC_AG_GRID_LICENSE_KEY || '');
 
 ModuleRegistry.registerModules([
   AllCommunityModule,
@@ -99,9 +94,11 @@ const GridComponentSSRM = () => {
     { field: 'total' },
   ]);
 
-  const defaultColDef = {
+  const [defaultColDef, setDefaultColDef] = useState({
     resizable: true,
-  };
+  });
+
+  const [rowSelection, setRowSelection] = useState({ mode: 'multiple'});
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
     console.log('Grid ready event received');
@@ -117,9 +114,7 @@ const GridComponentSSRM = () => {
         defaultColDef={defaultColDef}
         enableCharts={true} // Enable the Charting features
         cellSelection={true}
-        rowSelection={{
-          mode: 'multiRow',
-        }}
+        rowSelection={{ ...rowSelection}}
         rowModelType={'serverSide'}
         cacheBlockSize={50}
         onGridReady={onGridReady}
