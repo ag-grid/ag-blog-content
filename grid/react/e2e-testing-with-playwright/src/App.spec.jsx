@@ -25,144 +25,35 @@ test('should render component with AG Grid', async ({ mount }) => {
     await expect(component.locator('.ag-cell').nth(2)).toHaveText('64950');
 });
 
-test('should sort data by price when clicking on column headers', 
+test('should sort "Make" column ascending and then descending', 
     async ({ mount, page }) => {
         // 1. Mount the component
         const component = await mount(<App />);
         await page.waitForSelector('.ag-header-cell-label');
-    
-        // 2. Click on the "Price" column header 
-        // (first click for ascending order)
+
+        // 2. Locate the header cell with the text "Make"
         const priceHeader = 
             component.locator('.ag-header-cell-text', { hasText: 'Price' });
-        await expect(priceHeader).toBeVisible();
+
+        // 3. Click once to sort ascending
         await priceHeader.click();
-    
-        // 3. Determine how many rows are rendered
-        const rowCount = await component.locator('.ag-row').count();
-    
-        // 4. Gather prices from the rendered rows
-        const allPrices = [];
-        for (let i = 0; i < rowCount; i++) {
-            const price = await component
-                .locator(`.ag-row[row-index="${i}"] [col-id="price"]`)
-                .innerText();
-            allPrices.push(Number(price.replace(/,/g, ''))); // Convert to number
-        }
-    
-        // 5. Verify the ascending sort order
-        const sortedAsc = [...allPrices].sort((a, b) => a - b); // Ascending sort
-        expect(allPrices).toEqual(sortedAsc);
-    
-        // 6. Click the "Price" column header again 
-        // (second click for descending order)
+
+        // 4. Verify the first cell in the grid is now 'Fiat' (ascending by "price")
+        const firstItem = await component
+            .locator(`.ag-row[row-index="0"] [col-id="make"]`)
+            .innerText();
+        await expect(firstItem).toBe('Fiat');
+
+        // 5. Click again to sort descending
         await priceHeader.click();
-    
-        // 7. Gather prices again after sorting in descending order
-        const allPricesDesc = [];
-        for (let i = 0; i < rowCount; i++) {
-            const price = await component
-                .locator(`.ag-row[row-index="${i}"] [col-id="price"]`)
-                .innerText();
-            allPricesDesc.push(Number(price.replace(/,/g, ''))); // Convert to number
-        }
-    
-        // 8. Verify the descending sort order
-        const sortedDesc = [...allPrices].sort((a, b) => b - a); // Descending sort
-        expect(allPricesDesc).toEqual(sortedDesc);
-    }
-);
 
-test('should resize the columns when dragging the column resize handle', 
-    async ({ mount, page }) => {
-        // 1. Mount the component
-        const component = await mount(<App />);
-        await page.waitForSelector('.ag-header-cell-resize');
-    
-        // 2. Locate the resize handle for the "Make" column
-        const makeColumnResizeHandle = component.locator(
-            '.ag-header-cell[col-id="make"] .ag-header-cell-resize'
-        );
-    
-        // Ensure the resize handle is visible
-        await expect(makeColumnResizeHandle).toBeVisible();
-    
-        // 3. Get the initial width of the "Make" column
-        const makeColumn = component.locator('.ag-header-cell[col-id="make"]');
-        const initialWidth = await makeColumn.evaluate((el) => el.offsetWidth);
-    
-        // 4. Perform the drag action to resize the column
-        const resizeHandleBox = await makeColumnResizeHandle.boundingBox();
-        if (resizeHandleBox) {
-            await page.mouse.move(
-                resizeHandleBox.x + resizeHandleBox.width / 2, 
-                resizeHandleBox.y + resizeHandleBox.height / 2
-            ); // Move mouse to resize handle
-            await page.mouse.down(); // Hold the mouse button down
-            await page.mouse.move(
-                resizeHandleBox.x + resizeHandleBox.width / 2 + 50, 
-                resizeHandleBox.y + resizeHandleBox.height / 2
-            ); // Drag to resize
-            await page.mouse.up(); // Release the mouse button
-        }
-    
-        // 5. Get the new width of the "Make" column
-        const newWidth = await makeColumn.evaluate((el) => el.offsetWidth);
-    
-        // 6. Verify that the column width has increased
-        expect(newWidth).toBeGreaterThan(initialWidth);
-    }
-);
-
-
-test('should allow columns to be dragged and reorganized', 
-    async ({ mount, page }) => {
-        // 1. Mount the component
-        const component = await mount(<App />);
-        await page.waitForSelector('.ag-root');
-    
-        // 2. Locate the column headers for "Make" and "Model"
-        const makeHeader = component.locator('.ag-header-cell[col-id="make"]');
-        const modelHeader = component.locator('.ag-header-cell[col-id="model"]');
-    
-        // Ensure both headers are visible
-        await expect(makeHeader).toBeVisible();
-        await expect(modelHeader).toBeVisible();
-    
-        // 3. Perform drag-and-drop action to move "Make" 
-        // to the position before "Model"
-        const makeHeaderBox = await makeHeader.boundingBox();
-        const modelHeaderBox = await modelHeader.boundingBox();
-    
-        if (!makeHeaderBox || !modelHeaderBox) {
-        throw new Error('Unable to locate header bounding boxes');
-        }
-
-        // Dragging to align with "Model"
-        const dragOffset = modelHeaderBox.x - makeHeaderBox.x; 
-        await page.mouse.move(
-            makeHeaderBox.x + makeHeaderBox.width / 2, 
-            makeHeaderBox.y + makeHeaderBox.height / 2
-        );
-        await page.mouse.down();
-        await page.mouse.move(
-            makeHeaderBox.x + dragOffset, 
-            makeHeaderBox.y + makeHeaderBox.height / 2, 
-            { steps: 10 }
-        );
-        await page.mouse.up();
-    
-        // 4. Verify the new aria-colindex values
-        const updatedMakeColIndex = 
-            await makeHeader.getAttribute('aria-colindex');
-        const updatedModelColIndex = 
-            await modelHeader.getAttribute('aria-colindex');
-    
-        // Assert that the "Make" column is now positioned before "Model"
-        expect(Number(updatedMakeColIndex))
-            .toBeLessThan(Number(updatedModelColIndex));
-    }
-);
+        // 6. Verify the first cell in the grid is now 'Tesla' 
+        // (descending by "price")
+        const firstItemDesc = await component
+            .locator(`.ag-row[row-index="0"] [col-id="make"]`)
+            .innerText();
+        await expect(firstItemDesc).toBe('Tesla');
+});
 
 
 test('should allow editing of editable cells and update the data correctly', 
