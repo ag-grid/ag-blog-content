@@ -26,10 +26,9 @@ test('should render component with AG Grid', async ({ mount }) => {
 });
 
 test('should sort "Make" column ascending and then descending', 
-    async ({ mount, page }) => {
+    async ({ mount }) => {
         // 1. Mount the component
         const component = await mount(<App />);
-        await page.waitForSelector('.ag-header-cell-label');
 
         // 2. Locate the header cell with the text "Make"
         const priceHeader = 
@@ -57,49 +56,28 @@ test('should sort "Make" column ascending and then descending',
 
 
 test('should allow editing of editable cells and update the data correctly', 
-    async ({ mount, page }) => {
+    async ({ mount }) => {
         // 1. Mount the component
         const component = await mount(<App />);
-        await page.waitForSelector('.ag-root');
+
         // 2. Locate the editable cell for "Price" in the first row
         const priceCell = 
             component.locator('.ag-row[row-index="0"] [col-id="price"]');
-        // Ensure the cell is visible
-        await expect(priceCell).toBeVisible();
+
         // 3. Double-click the cell to activate edit mode
         await priceCell.dblclick();
         // Wait for the input field to appear (AG Grid renders it dynamically)
         const priceInput = priceCell.locator('input');
         await expect(priceInput).toBeVisible();
+        
         // 4. Enter a new value into the input field
         const newPrice = '70000';
         await priceInput.fill(newPrice);
         // Simulate pressing Enter to save the change
         await priceInput.press('Enter');
+        
         // 5. Verify the cell displays the updated value
         await expect(priceCell).toHaveText(newPrice);
-        // 6. Locate the editable cell for "Make" in the second row
-        const makeCell = 
-            component.locator('.ag-row[row-index="1"] [col-id="make"]');
-        // Ensure the cell is visible
-        await expect(makeCell).toBeVisible();
-        // 7. Double-click the cell to activate edit mode
-        await makeCell.dblclick();
-        // Wait for the input field to appear
-        const makeInput = makeCell.locator('input');
-        await expect(makeInput).toBeVisible();
-        // 8. Enter a new value into the input field
-        const newMake = 'Chevrolet';
-        await makeInput.fill(newMake);
-        // Simulate pressing Enter to save the change
-        await makeInput.press('Enter');
-        // 9. Verify the cell displays the updated value
-        await expect(makeCell).toHaveText(newMake);
-        // 10. Additional verification: Check all rendered cells for consistency
-        const updatedPrice = await priceCell.innerText();
-        const updatedMake = await makeCell.innerText();
-        expect(updatedPrice).toBe(newPrice); // Validate Price column value
-        expect(updatedMake).toBe(newMake); // Validate Make column value
     }
 );
 

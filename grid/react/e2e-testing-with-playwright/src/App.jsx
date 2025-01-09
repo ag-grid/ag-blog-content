@@ -23,9 +23,7 @@ function App() {
     { field: "electric" },
   ]);
 
-  const defaultColDef = {
-    flex: 1,
-  };
+  const [defaultColDef, setDefaultColDef] = useState({ flex: 1 });
 
   // Container: Defines the grid's theme & dimensions.
   return (
