@@ -110,6 +110,37 @@ test('should filter data by "Make" using the column filter menu',
     }
 );
 
+test('should allow keyboard navigation and focus within the grid', 
+    async ({ mount, page }) => {
+        // 1. Mount the component
+        const component = await mount(<App />);
+        await page.waitForSelector('.ag-root');
+        await component.locator('.ag-root').click();
+    
+        // 2. Press Tab to move focus onto the Make column header
+        await page.keyboard.press('Tab');
+        const makeHeader =
+            component.locator('.ag-header-cell[col-id="make"]');
+        // 3. Open the filter pop-up by clicking the filter icon, then close it
+        const makeHeaderFilterIcon =
+            makeHeader.locator('.ag-header-icon');
+        await makeHeaderFilterIcon.click();
+        const filterPopup = component.locator('.ag-filter-wrapper');
+        await expect(filterPopup).toBeVisible();
+    
+        // Press Escape to close the filter pop-up
+        await page.keyboard.press('Escape');
+        await expect(filterPopup).toBeHidden();
+    
+        // 4. Press ArrowDown to move focus from the header to the first row, "make" cell.
+        await page.keyboard.press('ArrowDown');
+        const firstRowFirstCell =
+            component.locator('.ag-row[row-index="0"] [col-id="make"]');
+        await expect(firstRowFirstCell).toBeFocused();
+    }
+);
+  
+
 // Test for loading data asynchronously and displaying it in the grid
 test("should load data asynchronously and display it in the grid", 
     async ({ mount, page }) => {
