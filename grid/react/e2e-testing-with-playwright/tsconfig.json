@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+      // Targeting modern browsers
+      "target": "ESNext",
+      // Use the latest ECMAScript module syntax
+      "module": "ESNext",
+      // Needed for React/JSX
+      "jsx": "react-jsx",
+      // Resolve modules using node’s resolution
+      "moduleResolution": "node",
+      // Output language features for modern bundlers
+      "lib": ["DOM", "DOM.Iterable", "ESNext"],
+      // Enable strict type-checking
+      "strict": true,
+      // Ensure consistent imports
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      // Generate .d.ts files? (Usually off for front-end projects)
+      "declaration": false,
+      // Root directory of source code
+      "rootDir": "src",
+      // Output directory after build
+      "outDir": "dist",
+      // Important for TypeScript + React
+      "allowJs": false
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"]
+  }
+  
