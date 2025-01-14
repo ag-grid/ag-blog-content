@@ -23,12 +23,14 @@ const data = [
   },
 ];
 
-const formatter = new Intl.NumberFormat("en-US");
+const formatter = new Intl.NumberFormat('en-US');
 
 const tooltipRenderer = (params) => {
   return {
     title: ` ${params.yName} Version`,
-    content: `Data Size: ${formatter.format(params.datum[params.xKey])}<br/>Time: ${params.datum[params.yKey]} ms`,
+    content: `Data Size: ${formatter.format(
+      params.datum[params.xKey]
+    )}<br/>Time: ${params.datum[params.yKey]} ms`,
   };
 };
 
@@ -44,19 +46,19 @@ const yAxisCrosshairFormatter = (p) => ({
 });
 
 const options = {
-  container: document.getElementById("myChart"),
+  container: document.getElementById('myChart'),
   title: {
-    text: "Rendering Time Comparison",
+    text: 'Rendering Time Comparison',
     fontSize: 18,
   },
-  theme: "ag-default-dark",
+  theme: 'ag-default',
   data,
   axes: [
     {
-      type: "category",
-      position: "bottom",
+      type: 'category',
+      position: 'bottom',
       title: {
-        text: "Data Size",
+        text: 'Data Size',
       },
       label: {
         formatter: (params) => {
@@ -73,10 +75,10 @@ const options = {
       },
     },
     {
-      type: "number",
-      position: "left",
+      type: 'number',
+      position: 'left',
       title: {
-        text: "Rendering Time (ms)",
+        text: 'Rendering Time (ms)',
       },
       label: {
         formatter: (params) =>
@@ -93,51 +95,57 @@ const options = {
   ],
   series: [
     {
-      type: "bar",
-      xKey: "dataSize",
-      yKey: "previous",
-      yName: "v10.3",
+      type: 'bar',
+      xKey: 'dataSize',
+      yKey: 'previous',
+      yName: 'v10.3',
       tooltip: {
         renderer: tooltipRenderer,
       },
       label: {
         enabled: true,
-        color: "white",
+        color: 'white',
         formatter: (p) => `${formatter.format(Math.floor(p.value))}ms`,
-        placement: "outside-end",
+        placement: 'outside-end',
         padding: 10,
       },
     },
     {
-      type: "bar",
-      xKey: "dataSize",
-      yKey: "current",
-      yName: "v11.0+",
+      type: 'bar',
+      xKey: 'dataSize',
+      yKey: 'current',
+      yName: 'v11.0+',
       tooltip: {
         renderer: tooltipRenderer,
       },
       label: {
         enabled: true,
-        color: "white",
+        color: 'white',
         formatter: (p) => `${formatter.format(Math.floor(p.value))}ms`,
-        placement: "outside-end",
+        placement: 'outside-end',
         padding: 10,
       },
     },
   ],
   legend: {
-    position: "top",
+    position: 'top',
   },
 };
 
 const chart = AgCharts.create(options);
+const numberAxisButton = document.getElementById('numberAxis');
+const logAxisButton = document.getElementById('logAxis');
 
 function setNumberAxis() {
-  options.axes[1].type = "number";
+  options.axes[1].type = 'number';
   chart.update(options);
+  logAxisButton.classList.remove('active');
+  numberAxisButton.classList.add('active');
 }
 
 function setLogAxis() {
-  options.axes[1].type = "log";
+  options.axes[1].type = 'log';
   chart.update(options);
+  numberAxisButton.classList.remove('active');
+  logAxisButton.classList.add('active');
 }

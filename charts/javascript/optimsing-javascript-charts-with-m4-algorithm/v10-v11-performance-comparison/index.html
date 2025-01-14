@@ -11,10 +11,12 @@
     />
     <style media="only screen">
       :root {
-        --button-background-color: transparent;
+        --button-background-color: #f8f9fa;
         --button-text-color: #212529;
         --button-color-border-primary: #d0d5dd;
-        --button-hover-background-color: rgba(0, 0, 0, 0.1);
+        --button-hover-background-color: #e2e6ea;
+        --button-active-background-color: #0d6efd;
+        --button-active-text-color: white;
         --select-chevron: url('data:image/svg+xml;utf8,<svg fill="none" stroke="%23182230" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 9L12 15L18 9"/></svg>');
 
         overflow: hidden;
@@ -23,12 +25,7 @@
           "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
           "Noto Color Emoji";
 
-        --button-text-color: #f8f9fa;
-        --button-color-border-primary: rgba(255, 255, 255, 0.2);
-        --button-hover-background-color: #2a343e;
-        --select-chevron: url('data:image/svg+xml;utf8,<svg fill="none" stroke="%23667085" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 9L12 15L18 9"/></svg>');
-
-        background: #192232;
+        background: white;
         color: white;
       }
 
@@ -59,6 +56,11 @@
         gap: calc(var(--gap-vertical) * 0.5) var(--gap-horizontal);
       }
 
+      .active {
+        --button-text-color: var(--button-active-text-color);
+        --button-background-color: var(--button-active-background-color);
+      }
+
       .toolbar hr {
         all: initial;
         flex: 0 0 100%;
@@ -79,11 +81,7 @@
         letter-spacing: 0.01em;
         padding: 0.375em 1em 0.5em;
         white-space: nowrap;
-        transition: background-color 0.25s ease-in-out;
-      }
-
-      .toolbar :is(button, select):hover {
-        background-color: var(--button-hover-background-color);
+        transition: background-color 0.25s ease-in-out, color 0.25s ease-in-out;
       }
 
       .toolbar button {
@@ -98,8 +96,8 @@
   </head>
   <body>
     <div class="toolbar">
-      <button onclick="setNumberAxis()">Number Axis</button>
-      <button onclick="setLogAxis()">Log Axis</button>
+      <button id="numberAxis" onclick="setNumberAxis()" class="active">Number Axis</button>
+      <button id="logAxis" onclick="setLogAxis()">Log Axis</button>
     </div>
     <div id="myChart"></div>
     <script src="https://charts-staging.ag-grid.com/dev/ag-charts-enterprise/dist/umd/ag-charts-enterprise.js?t=1731511773970"></script>
