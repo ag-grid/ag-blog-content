@@ -1,7 +1,7 @@
 # Unit testing AG Grid with React Testing Library and Vitest
 
 This repository complements the blog post
-[Unit testing AG Grid React components with React Testing Library and Vitest](https://blog.ag-grid.com/p/8a0d5d67-9d46-4db9-a18c-b898d5c3b367/#custom-renderer), providing a practical guide to effectively unit test your AG Grid components.
+[Unit testing AG Grid React components with React Testing Library and Vitest](https://blog.ag-grid.com/p/8a0d5d67-9d46-4db9-a18c-b898d5c3b367), providing a practical guide to effectively unit test your AG Grid components.
 
 ### Getting started
 
