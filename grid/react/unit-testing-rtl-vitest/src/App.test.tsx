@@ -91,24 +91,26 @@ describe("ActionButton component (Custom cell renderer)", () => {
     expect(buttons).toHaveLength(6);
   });
 
-  test("calls the onClick handler and displays an alert with the correct price", async () => {
-    render(<App />); 
-    const mockValue = 64950;
+  test("calls the onClick handler with the correct value",
+    async () => {
+      render(<App />); 
+      const mockValue = 64950;
 
-    // Mock alert function
-    const mockAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
+      // Mock alert function
+      const mockAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
 
-    // Simulate button click
-    const button = (await screen.findAllByTestId("action-button")).at(0);
-    if (!button) {
-      throw new Error("Button not found");
+      // Simulate button click
+      const button = (await screen.findAllByTestId("action-button")).at(0);
+      if (!button) {
+        throw new Error("Button not found");
+      }
+      await fireEvent.click(button);
+
+      // Verify alert was called with the correct value
+      expect(mockAlert).toHaveBeenCalledWith(`Price is: ${mockValue}`);
+
+      // Cleanup mock
+      mockAlert.mockRestore();
     }
-    await fireEvent.click(button);
-
-    // Verify alert was called with the correct value
-    expect(mockAlert).toHaveBeenCalledWith(`Price is: ${mockValue}`);
-
-    // Cleanup mock
-    mockAlert.mockRestore();
-  });
+  );
 });
