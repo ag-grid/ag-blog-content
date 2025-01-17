@@ -1,13 +1,15 @@
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { AllCommunityModule, ModuleRegistry, ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { fetchData, IDataType } from "./api";
+import ActionButton from "./components/ActionButton";
 
 export type ICar = {
 	make: string;
 	model: string;
 	price: number;
 	electric: boolean;
+	actions: React.ReactNode;
 }
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -28,6 +30,10 @@ function App() {
 		{ field: 'model' },
 		{ field: 'price', editable: true },
 		{ field: 'electric' },
+		{ field: 'actions', 
+			cellRenderer: (props: { data: { price: number; }; }) => 
+				<ActionButton value={props.data.price} children={'Launch'} /> 
+		}
 	]);
 
 

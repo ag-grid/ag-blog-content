@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom"; // For additional matchers
 import App from "./App";
 
@@ -42,7 +42,7 @@ describe("AG Grid component rendering", () => {
 		// Find all header text elements using querySelector
 		const headerTexts =
 			Array.from(container.getElementsByClassName('ag-header-cell-text')) as HTMLElement[];
-		const expectedHeaders = ["Make", "Model", "Price", "Electric"];
+		const expectedHeaders = ["Make", "Model", "Price", "Electric", "Actions",];
  
 		headerTexts.forEach((header, index) => {
 			expect(header.innerHTML).toBe(expectedHeaders[index]);
@@ -79,5 +79,36 @@ describe("Load async data", () => {
 
     // The loading text should now be gone
     expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+  });
+});
+
+
+describe("ActionButton component (Custom cell renderer)", () => {
+  test("renders ActionButton in the column", async () => {
+    render(<App />); 
+    // Verify button is rendered
+    const buttons = await screen.findAllByTestId("action-button");
+    expect(buttons).toHaveLength(6);
+  });
+
+  test("calls the onClick handler and displays an alert with the correct price", async () => {
+    render(<App />); 
+    const mockValue = 64950;
+
+    // Mock alert function
+    const mockAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
+
+    // Simulate button click
+    const button = (await screen.findAllByTestId("action-button")).at(0);
+    if (!button) {
+      throw new Error("Button not found");
+    }
+    await fireEvent.click(button);
+
+    // Verify alert was called with the correct value
+    expect(mockAlert).toHaveBeenCalledWith(`Price is: ${mockValue}`);
+
+    // Cleanup mock
+    mockAlert.mockRestore();
   });
 });
