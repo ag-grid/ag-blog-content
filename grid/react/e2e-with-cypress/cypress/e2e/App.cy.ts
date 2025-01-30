@@ -109,3 +109,20 @@ describe('AG Grid Make Column Filter', () => {
   });
 });
 
+describe('Accessibility Tests', () => {
+  it('should have no a11y violations on load', () => {
+    // 1) Visit your app
+    cy.visit('http://localhost:5173');
+
+    // 2) Inject axe into the page
+    cy.injectAxe();
+
+    // 3) Optionally wait for content to finish loading
+    cy.get('.ag-root').should('be.visible');
+    cy.get('.ag-overlay-loading-center').should('not.exist');
+
+    // 4) Run accessibility checks
+    cy.checkA11y();
+  });
+});
+

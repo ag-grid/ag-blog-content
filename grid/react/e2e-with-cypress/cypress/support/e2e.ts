@@ -15,3 +15,33 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+import 'cypress-axe';
+
+Cypress.Commands.add('injectAxe', () => {
+  cy.window({ log: false }).then((win) => {
+    // Inject axe-core runtime into the browser
+    // This makes the `axe` global available
+    const script = win.document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.6.3/axe.min.js';
+    win.document.head.appendChild(script);
+  });
+});
+
+Cypress.Commands.add('checkA11y', (context, options = {}, violationCallback) => {
+  // By default, run on the entire document if 'context' is not provided
+  cy.window({ log: false }).then((win) => {
+    return new Promise((resolve) => {
+      win.axe.run(context || win.document, options, (error, results) => {
+        if (error) throw error;
+        if (results.violations.length) {
+          if (violationCallback) {
+            violationCallback(results.violations);
+          } else {
+            cy.log('Accessibility violations found:', results.violations);
+          }
+        }
+        resolve(results);
+      });
+    });
+  });
+});
