@@ -4,36 +4,41 @@ import './Navigation.css';
 const Navigation = () => {
 const location = useLocation();
 
-    const isActive = (path: string) => {
-        return location.pathname === path;
-    };
+	const isActive = (path: string) => {
+		return location.pathname === path;
+	};
 
-    return (
-			<nav className="navigation">
-				<div className="nav-container">
-					<div className="nav-logo">
-						<span className="logo-text">My Grid App</span>
-					</div>
-						
-					<div className="nav-links">
-						<div className="menu-items">
-							<Link 
-									to="/" 
-									className={`nav-link ${isActive('/') ? 'active' : ''}`}
-							>
-									Home
-							</Link>
-							<Link 
-									to="/about" 
-									className={`nav-link ${isActive('/about') ? 'active' : ''}`}
-							>
-									Secondary Dashboard
-							</Link>
-						</div>
+	return (
+		<nav className="navigation">
+			<div className="nav-container">
+				<div className="nav-logo">
+					<span className="logo-text">My Grid App</span>
+				</div>
+				<div className="nav-links">
+					<div className="menu-items">
+						<Link 
+							to="/" 
+							className={`
+								nav-link 
+								${isActive('/') ? 'active' : ''}`
+							}
+						>
+							Main Grid
+						</Link>
+						<Link 
+							to="/secondary" 
+							className={`
+								nav-link 
+								${isActive('/secondary') ? 'active' : ''}`
+							}
+						>
+							Secondary Page
+						</Link>
 					</div>
 				</div>
-			</nav>
-    );
+			</div>
+		</nav>
+	);
 };
 
 export default Navigation;
