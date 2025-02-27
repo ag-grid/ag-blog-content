@@ -25,7 +25,8 @@ function GridComponent() {
   const gridRef = useRef(null) as any;
   const [rowData, setRowData] = useState();
 
-	const { gridState, setGridState } = useStore();
+	const { gridState, setGridState, resetGridState } = useStore();
+	const [isGridReady, setIsGridReady] = useState(false);
   
   const [columnDefs, setColumnDefs] = useState([
     { field: "athlete", minWidth: 150 },
@@ -58,53 +59,62 @@ function GridComponent() {
     [],
   );
 
-  const onGridReady = useCallback((params: any) => {
-    fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
-      .then((resp) => resp.json())
-      .then((data) => setRowData(data));
-    
-    // Apply saved state from Zustand store
-    if (gridState && gridRef.current && gridRef.current.api) {
-      console.log("Applying saved grid state:", gridState);
-      
-      // Apply column state (includes width, visibility, order)
-      if (gridState.columnState) {
-        gridRef.current.api.applyColumnState({
-          state: gridState.columnState,
-          applyOrder: true,
-        });
-      }
-      
-      // Apply filter model if exists
-      if (gridState.filterModel) {
-        gridRef.current.api.setFilterModel(gridState.filterModel);
-      }
-      
-      // Apply sort model if exists
-      if (gridState.sortModel) {
-        gridRef.current.api.setSortModel(gridState.sortModel);
-      }
-      
-      // Apply row group model if exists
-      if (gridState.rowGroupColumnsState) {
-        const rowGroupCols = gridState.rowGroupColumnsState.map((item: any) => item.colId);
-        gridRef.current.columnApi.setRowGroupColumns(rowGroupCols);
-      }
-      
-      // Apply pivot model if exists
-      if (gridState.pivotColumnsState) {
-        const pivotCols = gridState.pivotColumnsState.map((item: any) => item.colId);
-        gridRef.current.columnApi.setPivotColumns(pivotCols);
-      }
-    }
-  }, [gridState]);
+	const onGridReady = useCallback((params: any) => {
+		fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
+			.then((resp) => resp.json())
+			.then((data) => setRowData(data));
+		
+		setIsGridReady(true);
+	}, []);
 
-	// Use the gridState from Zustand as initialState
-  useEffect(() => {
-    if (gridState) {
-      console.log("Setting initial state from Zustand store");
-    }
-  }, [gridState]);
+	// Apply saved state after grid is 
+	// ready and we have the gridState from localStorage
+	useEffect(() => {
+		if (isGridReady && 
+			gridState && 
+			gridRef.current && gridRef.current.api
+		) {
+			console.log(
+				"Applying saved grid state from localStorage:", gridState
+			);
+			
+			// Apply column state (includes width, visibility, order)
+			if (gridState.columnState) {
+				gridRef.current.api.applyColumnState({
+					state: gridState.columnState,
+					applyOrder: true,
+				});
+			}
+			
+			// Apply filter model if exists
+			if (gridState.filterModel) {
+				gridRef.current.api.setFilterModel(gridState.filterModel);
+			}
+			
+			// Apply sort model if exists
+			if (gridState.sortModel) {
+				gridRef.current.api.setSortModel(gridState.sortModel);
+			}
+			
+			// Apply row group model if exists
+			if (gridState.rowGroupColumnsState) {
+				const rowGroupCols = 
+					gridState.rowGroupColumnsState.map(
+						(item: any) => item.colId
+					);
+				gridRef.current.columnApi.setRowGroupColumns(rowGroupCols);
+			}
+			
+			// Apply pivot model if exists
+			if (gridState.pivotColumnsState) {
+				const pivotCols = 
+					gridState.pivotColumnsState.map(
+						(item: any) => item.colId
+					);
+				gridRef.current.columnApi.setPivotColumns(pivotCols);
+			}
+		}
+	}, [isGridReady, gridState]);
 
   const onGridPreDestroyed = useCallback((params: any) => {
     const { state } = params;
@@ -127,9 +137,44 @@ function GridComponent() {
     }
   }, [setGridState]);
 
+	const clearSavedState = useCallback(() => {
+		resetGridState();
+		
+		// Reset the grid UI to default state
+		if (gridRef.current && gridRef.current.api) {
+			gridRef.current.api.resetColumnState();
+			gridRef.current.api.setFilterModel(null);
+			gridRef.current.api.setSortModel(null);
+			
+			// Reset row groups and pivots if applicable
+			if (gridRef.current.columnApi) {
+				gridRef.current.columnApi.setRowGroupColumns([]);
+				gridRef.current.columnApi.setPivotColumns([]);
+			}
+		}
+		
+		alert("Grid configuration has been reset to default");
+	}, [resetGridState]);
+
 	return (
 		<div style={{ width: "100%", height: '90vh' }}>
-			<button onClick={saveCurrentState} style={{ marginTop: '10px', marginBottom: '10px' }}>Save Grid State</button>
+			<button 
+				onClick={saveCurrentState} 
+				style={{ 
+					marginTop: '10px', 
+					marginBottom: '10px' 
+				}}>
+					Save Grid State
+			</button>
+			<button 
+        onClick={clearSavedState}
+        style={{
+          backgroundColor: '#f44336',
+          color: 'white',
+					marginLeft: '10px',
+        }}>
+        Reset to Default
+      </button>
 			<AgGridReact
 				ref={gridRef}
 				rowData={rowData}
