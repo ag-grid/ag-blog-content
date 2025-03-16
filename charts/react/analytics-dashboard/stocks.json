@@ -1,0 +1,226 @@
+[
+    {
+      "company_name": "Apple Inc.",
+      "ticker": "AAPL",
+      "amount": 50,
+      "entry_price": 150,
+      "total_price": 7500
+    },
+    {
+      "company_name": "Microsoft Corporation",
+      "ticker": "MSFT",
+      "amount": 40,
+      "entry_price": 250,
+      "total_price": 10000
+    },
+    {
+      "company_name": "Amazon.com Inc.",
+      "ticker": "AMZN",
+      "amount": 30,
+      "entry_price": 200,
+      "total_price": 6000
+    },
+    {
+      "company_name": "NVIDIA Corporation",
+      "ticker": "NVDA",
+      "amount": 20,
+      "entry_price": 500,
+      "total_price": 10000
+    },
+    {
+      "company_name": "Meta Platforms, Inc.",
+      "ticker": "META",
+      "amount": 25,
+      "entry_price": 300,
+      "total_price": 7500
+    },
+    {
+      "company_name": "Tesla, Inc.",
+      "ticker": "TSLA",
+      "amount": 15,
+      "entry_price": 600,
+      "total_price": 9000
+    },
+    {
+      "company_name": "Alphabet Inc. Class A",
+      "ticker": "GOOGL",
+      "amount": 20,
+      "entry_price": 180,
+      "total_price": 3600
+    },
+    {
+      "company_name": "Alphabet Inc. Class C",
+      "ticker": "GOOG",
+      "amount": 20,
+      "entry_price": 180,
+      "total_price": 3600
+    },
+    {
+      "company_name": "Advanced Micro Devices Inc.",
+      "ticker": "AMD",
+      "amount": 35,
+      "entry_price": 100,
+      "total_price": 3500
+    },
+    {
+      "company_name": "Adobe Inc.",
+      "ticker": "ADBE",
+      "amount": 10,
+      "entry_price": 400,
+      "total_price": 4000
+    },
+    {
+      "company_name": "American Electric Power Company, Inc.",
+      "ticker": "AEP",
+      "amount": 20,
+      "entry_price": 90,
+      "total_price": 1800
+    },
+    {
+      "company_name": "Lululemon Athletica Inc.",
+      "ticker": "LULU",
+      "amount": 10,
+      "entry_price": 350,
+      "total_price": 3500
+    },
+    {
+      "company_name": "Ross Stores, Inc.",
+      "ticker": "ROST",
+      "amount": 25,
+      "entry_price": 120,
+      "total_price": 3000
+    },
+    {
+      "company_name": "Axon Enterprise, Inc.",
+      "ticker": "AXON",
+      "amount": 15,
+      "entry_price": 200,
+      "total_price": 3000
+    },
+    {
+      "company_name": "Diamondback Energy, Inc.",
+      "ticker": "FANG",
+      "amount": 20,
+      "entry_price": 150,
+      "total_price": 3000
+    },
+    {
+      "company_name": "Datadog, Inc.",
+      "ticker": "DDOG",
+      "amount": 20,
+      "entry_price": 100,
+      "total_price": 2000
+    },
+    {
+      "company_name": "Monster Beverage Corporation",
+      "ticker": "MNST",
+      "amount": 30,
+      "entry_price": 50,
+      "total_price": 1500
+    },
+    {
+      "company_name": "Trip.com Group Limited",
+      "ticker": "TCOM",
+      "amount": 40,
+      "entry_price": 30,
+      "total_price": 1200
+    },
+    {
+      "company_name": "Nasdaq, Inc.",
+      "ticker": "NDAQ",
+      "amount": 15,
+      "entry_price": 150,
+      "total_price": 2250
+    },
+    {
+      "company_name": "Take-Two Interactive Software, Inc.",
+      "ticker": "TTWO",
+      "amount": 20,
+      "entry_price": 150,
+      "total_price": 3000
+    },
+    {
+      "company_name": "Baidu, Inc.",
+      "ticker": "BIDU",
+      "amount": 25,
+      "entry_price": 120,
+      "total_price": 3000
+    },
+    {
+      "company_name": "Willis Towers Watson Public Limited Company",
+      "ticker": "WTW",
+      "amount": 10,
+      "entry_price": 220,
+      "total_price": 2200
+    },
+    {
+      "company_name": "eBay Inc.",
+      "ticker": "EBAY",
+      "amount": 30,
+      "entry_price": 60,
+      "total_price": 1800
+    },
+    {
+      "company_name": "Ferrovial SE",
+      "ticker": "FER",
+      "amount": 50,
+      "entry_price": 25,
+      "total_price": 1250
+    },
+    {
+      "company_name": "CoStar Group, Inc.",
+      "ticker": "CSGP",
+      "amount": 20,
+      "entry_price": 80,
+      "total_price": 1600
+    },
+    {
+      "company_name": "Electronic Arts Inc.",
+      "ticker": "EA",
+      "amount": 20,
+      "entry_price": 130,
+      "total_price": 2600
+    },
+    {
+      "company_name": "Zscaler, Inc.",
+      "ticker": "ZS",
+      "amount": 15,
+      "entry_price": 180,
+      "total_price": 2700
+    },
+    {
+      "company_name": "Monolithic Power Systems, Inc.",
+      "ticker": "MPWR",
+      "amount": 10,
+      "entry_price": 400,
+      "total_price": 4000
+    },
+    {
+      "company_name": "Airbnb, Inc.",
+      "ticker": "ABNB",
+      "amount": 20,
+      "entry_price": 150,
+      "total_price": 3000
+    },
+    {
+      "company_name": "Cadence Design Systems, Inc.",
+      "ticker": "CDNS",
+      "amount": 15,
+      "entry_price": 200,
+      "total_price": 3000
+    },
+    {
+      "company_name": "Synopsys, Inc.",
+      "ticker": "SNPS",
+      "amount": 10,
+      "entry_price": 250,
+      "total_price": 2500
+    },
+    {
+      "company_name": "Cintas Corporation",
+      "ticker": "CTAS",
+      "amount": 10,
+      "entry_price": 350,
+      "total_price": 3500
+    }
+]
