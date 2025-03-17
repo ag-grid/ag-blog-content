@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
+import 'ag-grid-enterprise';
 import { 
   ModuleRegistry,
   ClientSideRowModelModule, 
@@ -9,12 +10,17 @@ import {
   ColDef,
   CellClickedEvent
 } from "ag-grid-community";
+import { IntegratedChartsModule, ContextMenuModule } from "ag-grid-enterprise";
+import { AgChartsEnterpriseModule } from 'ag-charts-enterprise';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
   PaginationModule,
   NumberFilterModule,
-  TextFilterModule
+  TextFilterModule,
+  ClientSideRowModelModule,
+  ContextMenuModule,
+  IntegratedChartsModule.with(AgChartsEnterpriseModule)
 ]);
 
 type StockData = {
@@ -93,6 +99,8 @@ const StockTable = ({stocks, onTickerSelect } : {
         domLayout="autoHeight"
         gridOptions={gridOptions}
         onCellClicked={onCellClicked}
+        enableCharts
+        cellSelection
       />
     </div>
   );
