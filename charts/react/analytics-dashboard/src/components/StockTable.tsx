@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { 
   ModuleRegistry,
@@ -6,7 +6,8 @@ import {
   PaginationModule, 
   NumberFilterModule, 
   TextFilterModule, 
-  ColDef 
+  ColDef,
+  CellClickedEvent
 } from "ag-grid-community";
 
 ModuleRegistry.registerModules([
@@ -25,8 +26,9 @@ type StockData = {
   total_price: number;
 }
 
-const StockTable = ({stocks} : {
+const StockTable = ({stocks, onTickerSelect } : {
   stocks: StockData[]
+  onTickerSelect: (ticker: string) => void
 }) => {
 
 
@@ -74,6 +76,12 @@ const StockTable = ({stocks} : {
     cellSelection: true,
   };
 
+  const onCellClicked = useCallback((event: CellClickedEvent) => {
+    if (event.colDef.field === "ticker") {
+      onTickerSelect(event.value as string);
+    }
+  }, []);
+
   return (
     <div>
       <AgGridReact
@@ -84,6 +92,7 @@ const StockTable = ({stocks} : {
         paginationPageSize={10}
         domLayout="autoHeight"
         gridOptions={gridOptions}
+        onCellClicked={onCellClicked}
       />
     </div>
   );
