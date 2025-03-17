@@ -3,6 +3,7 @@ import stocks from "../stocks.json";
 import StockTable from './components/StockTable';
 import { useState } from 'react';
 import HistoricPriceChart from './components/HistoricPrice';
+import DailyPrice from './components/DailyPrice';
 
 function App() {
 
@@ -32,7 +33,10 @@ function App() {
 
   return (
     <>
-      <HistoricPriceChart ticker={ticker} />
+      <div style={{ display: "flex", width: "100%" }}>
+        <HistoricPriceChart ticker={ticker} />
+        <DailyPrice ticker={ticker} />
+      </div>
       <StockTable 
         stocks={stocksWithBuyPrice} 
         onTickerSelect={selectTicker}
