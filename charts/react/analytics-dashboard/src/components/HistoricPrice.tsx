@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "ag-charts-enterprise";
 import { AgCharts } from "ag-charts-react";
 import { AgChartOptions } from "ag-charts-enterprise";
-import useStockData, { StockData } from "../hooks/useHistoricData";
+import useStockData from "../hooks/useHistoricData";
 
 interface HistoricPriceChartProps {
   ticker: string;
