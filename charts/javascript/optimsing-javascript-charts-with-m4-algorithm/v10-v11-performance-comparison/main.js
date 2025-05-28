@@ -27,10 +27,14 @@ const formatter = new Intl.NumberFormat('en-US');
 
 const tooltipRenderer = (params) => {
   return {
-    title: ` ${params.yName} Version`,
-    content: `Data Size: ${formatter.format(
-      params.datum[params.xKey]
-    )}<br/>Time: ${params.datum[params.yKey]} ms`,
+    heading: `${formatter.format(params.datum[params.xKey])} Data Points`,
+    title: `${params.yName}`,
+    data: [
+      {
+        label: 'Rendering Time',
+        value: `${formatter.format(Math.floor(params.datum[params.yKey]))} ms`,
+      },
+    ],
   };
 };
 
