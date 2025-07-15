@@ -1,0 +1,12 @@
+<div >
+  <ag-grid-angular style="height: 100vh"
+    [rowData]="rowData()"
+    [columnDefs]="columnDefs"
+    [defaultColDef]="defaultColDef"
+    [getContextMenuItems]="getContextMenuItems"
+    editType="fullRow"
+    [cellSelection]="true"
+    [rowNumbers]="true"
+    (gridReady)="onGridReady($event)"
+  />
+</div>
