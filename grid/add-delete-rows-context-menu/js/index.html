@@ -3,9 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <title>AG Grid Vanilla JS: Add & Delete Rows</title>
+  <style media="only screen">
+    :root,
+    body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    html {
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 0;
+      overflow: auto;
+      font-family: -apple-system, "system-ui", "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+    }
+
+    body {
+      padding: 16px;
+      overflow: auto;
+      background-color: transparent;
+    }
+  </style>
 </head>
 <body>
-  <div id="myGrid" style="height:100vh;width:100%;"></div>
+  <div id="myGrid" style="height: 100%"></div>
 
   <!-- AG Grid UMD bundles -->
   <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.noStyle.js"></script>
