@@ -11,7 +11,7 @@
 }
 
 /* Cells with values in pinned row */
-.pinned-row-editing {
+.pinned-cell-editing {
   font-style: normal;
   color: #333;
   font-weight: 500;
@@ -20,6 +20,6 @@
 }
 
 /* Hover effect for empty cells */
-.pinned-row .ag-cell:not(.pinned-row-editing):hover {
+.pinned-row .ag-cell:not(.pinned-cell-editing):hover {
   background-color: #f1f3f4;
 }
