@@ -6,6 +6,10 @@
   border-bottom: 2px solid #e9ecef;
 }
 
+.pinned-row:hover {
+  cursor: text;
+}
+
 /* Cells with values in pinned row */
 .pinned-row-editing {
   font-style: normal;
