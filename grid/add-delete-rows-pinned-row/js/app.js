@@ -1,25 +1,21 @@
 const demoDataUrl =
   'https://www.ag-grid.com/example-assets/olympic-winners.json';
-let rowData = [];
 let inputRow = {};
 let gridApi;
 
-function setRowData(newData) {
-  rowData = newData;
-  console.log(newData);
-  // gridApi.setGridOption('rowData', rowData);
-  const transaction = gridApi.applyTransaction({
-    add: newData,
-    addIndex: 0,
-  });
+const rowClassRules = {
+  'pinned-row': (params) => params.node.rowPinned,
+};
 
-  console.log(transaction);
-}
+const cellClassRules = {
+  'pinned-row-editing': (params) => params.node.rowPinned && params.value,
+};
 
-function setInputRow(newData) {
-  inputRow = newData;
-  gridApi.setGridOption('pinnedTopRowData', [inputRow]);
-}
+const rowNumbersOptions = {
+  valueFormatter: (params) => {
+    return params?.node?.rowPinned ? '' : params?.value;
+  },
+};
 
 function createPinnedCellPlaceholder({ colDef }) {
   return colDef.field[0].toUpperCase() + colDef.field.slice(1) + '...';
@@ -72,6 +68,8 @@ const defaultColDef = {
   flex: 1,
   editable: true,
   valueFormatter,
+  cellClassRules,
+  enableCellChangeFlash: true,
 };
 
 const fetchData = async () => {
@@ -80,8 +78,7 @@ const fetchData = async () => {
     const data = await response.json();
     const trimmedData = data.slice(3, 6);
     const parsedData = parseDateStrings(trimmedData);
-    rowData = parsedData;
-    gridApi.setGridOption('rowData', rowData);
+    gridApi.setGridOption('rowData', parsedData);
   } catch (error) {
     console.error('Failed to load data:', error);
   }
@@ -102,26 +99,33 @@ const onGridReady = (params) => {
   fetchData();
 };
 
-function isPinnedRowDataCompleted() {
+function isPinnedRowEditingCompleted() {
   return columnDefs.every((def) => inputRow[def.field]);
 }
 
 const onCellEditingStopped = (params) => {
-  if (params.rowPinned === 'top' && isPinnedRowDataCompleted()) {
-    setRowData(inputRow);
-    setInputRow({});
-  }
-};
+  if (params.rowPinned === 'top' && isPinnedRowEditingCompleted()) {
+    // Add Input Row Data to Grid
+    const addedRow = gridApi.applyTransaction({
+      add: [inputRow],
+    });
 
-const rowClassRules = {
-  'pinned-row': (params) => params.node.rowPinned,
+    // Flash New Row
+    gridApi.flashCells({
+      rowNodes: addedRow.add,
+    });
+
+    // Empty Input Row
+    inputRow = {};
+    gridApi.setGridOption('pinnedTopRowData', [inputRow]);
+  }
 };
 
 const gridOptions = {
   columnDefs,
   defaultColDef,
   pinnedTopRowData: [inputRow],
-  rowNumbers: true,
+  rowNumbers: rowNumbersOptions,
   rowClassRules,
   onCellEditingStopped,
   onGridReady,

@@ -1,4 +1,21 @@
+/* Pinned input row */
 .pinned-row {
-  font-weight: 800;
+  background-color: #f8f9fa;
   font-style: italic;
+  color: #6c757d;
+  border-bottom: 2px solid #e9ecef;
+}
+
+/* Cells with values in pinned row */
+.pinned-row-editing {
+  font-style: normal;
+  color: #333;
+  font-weight: 500;
+  background-color: #fff3cd;
+  border-left: 2px solid #fd7e14;
+}
+
+/* Hover effect for empty cells */
+.pinned-row .ag-cell:not(.pinned-row-editing):hover {
+  background-color: #f1f3f4;
 }
