@@ -1,3 +1,5 @@
+const demoDataUrl =
+  'https://www.ag-grid.com/example-assets/olympic-winners.json';
 let rowData = [];
 let inputRow = {};
 let gridApi;
@@ -5,7 +7,13 @@ let gridApi;
 function setRowData(newData) {
   rowData = newData;
   console.log(newData);
-  gridApi.setGridOption('rowData', newData);
+  // gridApi.setGridOption('rowData', rowData);
+  const transaction = gridApi.applyTransaction({
+    add: newData,
+    addIndex: 0,
+  });
+
+  console.log(transaction);
 }
 
 function setInputRow(newData) {
@@ -13,26 +21,36 @@ function setInputRow(newData) {
   gridApi.setGridOption('pinnedTopRowData', [inputRow]);
 }
 
-const valueFormatter = (params) => {
-  console.log(`Formatting value for ${params.colDef.field}`);
+function createPinnedCellPlaceholder({ colDef }) {
+  return colDef.field[0].toUpperCase() + colDef.field.slice(1) + '...';
+}
+
+function formatDate(date) {
+  if (!(date instanceof Date)) return date;
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function isEmptyPinnedCell({ node, value }) {
+  return node.rowPinned === 'top' && (value == null || value === '');
+}
+
+function valueFormatter(params) {
   if (isEmptyPinnedCell(params)) {
     return createPinnedCellPlaceholder(params);
   }
 
-  // Format dates as DD/MM/YYYY
-  if (params.colDef.field === 'date' && params.value instanceof Date) {
-    const day = params.value.getDate().toString().padStart(2, '0');
-    const month = (params.value.getMonth() + 1).toString().padStart(2, '0');
-    const year = params.value.getFullYear();
-    return `${day}/${month}/${year}`;
+  if (params.colDef.field === 'date') {
+    return formatDate(params.value);
   }
 
   return params.value;
-};
+}
 
-// column definitions
 const columnDefs = [
-  { field: 'athlete', valueFormatter: valueFormatter },
+  { field: 'athlete' },
   {
     field: 'sport',
     cellRenderer: SportRenderer,
@@ -41,76 +59,72 @@ const columnDefs = [
       values: ['Swimming', 'Gymnastics', 'Cycling', 'Ski Jumping'],
       cellRenderer: SportRenderer,
     },
-    valueFormatter: valueFormatter,
   },
   {
     field: 'date',
     cellEditor: 'agDateCellEditor',
-    valueFormatter: valueFormatter,
+    valueFormatter,
   },
-  {
-    field: 'age',
-    valueFormatter: valueFormatter,
-  },
+  { field: 'age', valueFormatter },
 ];
 
 const defaultColDef = {
   flex: 1,
   editable: true,
+  valueFormatter,
 };
 
-function isEmptyPinnedCell({ node, value }) {
-  return (
-    (node.rowPinned === 'top' && value == null) ||
-    (node.rowPinned === 'top' && value == '')
-  );
-}
+const fetchData = async () => {
+  try {
+    const response = await fetch(demoDataUrl);
+    const data = await response.json();
+    const trimmedData = data.slice(3, 6);
+    const parsedData = parseDateStrings(trimmedData);
+    rowData = parsedData;
+    gridApi.setGridOption('rowData', rowData);
+  } catch (error) {
+    console.error('Failed to load data:', error);
+  }
+};
 
-function createPinnedCellPlaceholder({ colDef }) {
-  return colDef.field[0].toUpperCase() + colDef.field.slice(1) + '...';
-}
+const parseDateStrings = (data) => {
+  return data.map((d) => {
+    const [day, month, year] = d.date.split('/');
+    return {
+      ...d,
+      date: new Date(year, month - 1, day),
+    };
+  });
+};
 
-function isPinnedRowDataCompleted(params) {
-  if (params.rowPinned !== 'top') return;
+const onGridReady = (params) => {
+  gridApi = params.api;
+  fetchData();
+};
+
+function isPinnedRowDataCompleted() {
   return columnDefs.every((def) => inputRow[def.field]);
 }
+
+const onCellEditingStopped = (params) => {
+  if (params.rowPinned === 'top' && isPinnedRowDataCompleted()) {
+    setRowData(inputRow);
+    setInputRow({});
+  }
+};
+
+const rowClassRules = {
+  'pinned-row': (params) => params.node.rowPinned,
+};
 
 const gridOptions = {
   columnDefs,
   defaultColDef,
   pinnedTopRowData: [inputRow],
   rowNumbers: true,
-  getRowStyle: ({ node }) =>
-    node.rowPinned ? { 'font-weight': 'bold', 'font-style': 'italic' } : 0,
-  onCellEditingStopped: (params) => {
-    if (isPinnedRowDataCompleted(params)) {
-      // save data
-      setRowData([...rowData, inputRow]);
-      //reset pinned row
-      setInputRow({});
-    }
-  },
-  onGridReady: (params) => {
-    gridApi = params.api;
-    fetch('https://www.ag-grid.com/example-assets/olympic-winners.json')
-      .then((res) => res.json())
-      .then((data) => data.slice(3, 6))
-      .then((trimmedData) =>
-        trimmedData.map((d) => {
-          // Convert DD/MM/YYYY to Date object
-          const [day, month, year] = d.date.split('/');
-          return {
-            ...d,
-            date: new Date(year, month - 1, day), // month is 0-indexed in JavaScript
-          };
-        })
-      )
-      .then((parsedDateData) => {
-        rowData = parsedDateData;
-        params.api.setGridOption('rowData', parsedDateData);
-      })
-      .catch(console.error);
-  },
+  rowClassRules,
+  onCellEditingStopped,
+  onGridReady,
 };
 
 document.addEventListener('DOMContentLoaded', () => {
