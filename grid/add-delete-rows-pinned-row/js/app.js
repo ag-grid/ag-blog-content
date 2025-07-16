@@ -51,6 +51,7 @@ const valueFormatter = (params) => {
     return formatDate(params.value);
   }
 
+  // Return plain value for all other cells
   return params.value;
 };
 
@@ -147,7 +148,6 @@ const defaultColDef = {
   editable: true,
   valueFormatter,
   cellClassRules,
-  enableCellChangeFlash: true,
 };
 
 const gridOptions = {
