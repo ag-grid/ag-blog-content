@@ -108,11 +108,6 @@ const cellClassRules = {
   'pinned-cell-editing': (params) => params.node.rowPinned && params.value,
 };
 
-// Apply CSS Class to Pinned Rows
-const rowClassRules = {
-  'pinned-row': (params) => params.node.rowPinned,
-};
-
 // Column definitions - specify fields, editors, and renderers
 const columnDefs = [
   {
@@ -155,7 +150,6 @@ const gridOptions = {
   defaultColDef,
   pinnedTopRowData: [inputRow], // Pin an empty row at the top for data entry
   rowNumbers: rowNumberOptions, // Show row numbers for non-pinned rows
-  rowClassRules, // Style the pinned row differently
   onGridReady, // Init API & fetch data
   onCellEditingStopped, // Listen for pinned row edits
 };

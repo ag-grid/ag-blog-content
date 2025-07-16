@@ -169,9 +169,6 @@ const App: React.FC = () => {
           rowNumbers={{
             valueFormatter: rowNumbersFormatter,
           }}
-          rowClassRules={{
-            'pinned-row': (params: any) => params.node.rowPinned,
-          }}
           onCellEditingStopped={onCellEditingStopped}
         />
       </div>

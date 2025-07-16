@@ -1,12 +1,12 @@
 /* Pinned input row */
-.pinned-row {
+.ag-row-pinned {
   background-color: #f8f9fa;
   font-style: italic;
   color: #6c757d;
   border-bottom: 2px solid #e9ecef;
 }
 
-.pinned-row:hover {
+.ag-row-pinned:hover {
   cursor: text;
 }
 
