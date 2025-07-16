@@ -1,69 +1,40 @@
-# React + TypeScript + Vite
+# AG Grid Add/Delete Rows with Pinned Row - React TypeScript
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This demo shows how to implement a data entry form using AG Grid's pinned row feature in React with TypeScript. Users can add new rows by filling in the top row.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Pinned Row Input**: Top row acts as a form for adding new data
+- **Auto-submission**: New rows are automatically added when all fields are complete
+- **Visual Feedback**: Pending edits are highlighted with orange styling
+- **Sport Icons**: Custom renderer with Font Awesome icons
+- **Date Handling**: Built-in date picker with proper formatting
+- **TypeScript**: Full type safety and IntelliSense support
 
-## Expanding the ESLint configuration
+## Running the Demo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/
+│   └── SportRenderer.tsx    # Custom cell renderer for sport icons
+├── utils/
+│   └── dateUtils.ts         # Date formatting utilities
+├── App.tsx                  # Main grid component
+├── App.css                  # Grid styling
+├── index.css                # Global styles
+└── main.tsx                 # Entry point
+```
+
+## Key Technologies
+
+- **AG Grid React**: Data grid component
+- **TypeScript**: Type safety
+- **Vite**: Build tool and dev server
+- **Font Awesome**: Icons for sports

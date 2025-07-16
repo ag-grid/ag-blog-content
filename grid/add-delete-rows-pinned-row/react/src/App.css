@@ -1,42 +1,25 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Pinned input row */
+.pinned-row {
+  background-color: #f8f9fa;
+  font-style: italic;
+  color: #6c757d;
+  border-bottom: 2px solid #e9ecef;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.pinned-row:hover {
+  cursor: text;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Cells with values in pinned row */
+.pinned-cell-editing {
+  font-style: normal;
+  color: #333;
+  font-weight: 500;
+  background-color: #fff3cd;
+  border-left: 2px solid #fd7e14;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+/* Hover effect for empty cells */
+.pinned-row .ag-cell:not(.pinned-cell-editing):hover {
+  background-color: #f1f3f4;
 }
