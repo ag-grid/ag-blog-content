@@ -44,9 +44,17 @@ const rowNumbersOptions = {
   },
 };
 
+const cellClassRules = {
+  'pinned-cell-editing': (params: CellClassParams) =>
+    params?.node?.rowPinned && params.value,
+};
+
 const App: React.FC = () => {
-  const [rowData, setRowData] = useState<AthleteData[]>([]);
-  const [inputRow, setInputRow] = useState<Partial<AthleteData>>({});
+  // Store rowData, fetched from external API
+  const [rowData, setRowData] = useState<AthleteData[]>();
+  // Store Pinned Row Data, which is automatically updated by the Grid
+  const [pinnedRowData, setPinnedRowData] = useState<Partial<AthleteData>>({});
+  // Store reference to the grid, to access the API
   const gridRef = useRef<AgGridReact>(null);
 
   const columnDefs: ColDef<AthleteData>[] = [
@@ -81,10 +89,7 @@ const App: React.FC = () => {
     flex: 1,
     editable: true,
     valueFormatter,
-    cellClassRules: {
-      'pinned-cell-editing': (params: CellClassParams) =>
-        params?.node?.rowPinned && params.value,
-    },
+    cellClassRules,
   };
 
   // Load data on component mount
@@ -110,14 +115,14 @@ const App: React.FC = () => {
   }, []);
 
   // Check all pinned row cells have a value
-  const isInputRowComplete = () => {
+  const isPinnedRowComplete = () => {
     return columnDefs.every((colDef) => {
-      const field = colDef.field;
-      if (field) {
-        const value = inputRow[field];
-        return value !== undefined && value !== null && value !== '';
-      }
-      return false;
+      // Ignore edits if pinned row does not contain all columns
+      if (!colDef.field) return false;
+
+      // Ignore edits if pinned row cell value is undefined
+      const v = pinnedRowData[colDef.field!];
+      return v != null && v !== '';
     });
   };
 
@@ -127,15 +132,15 @@ const App: React.FC = () => {
       if (params.rowPinned !== 'top') return;
 
       // Check all pinned row cells have a value
-      if (isInputRowComplete()) {
+      if (isPinnedRowComplete()) {
         // Add new row to data
         const transaction = gridRef.current?.api.applyTransaction({
-          add: [inputRow],
+          add: [pinnedRowData],
         });
 
         // Reset input row
-        setInputRow({});
-        gridRef.current?.api.setGridOption('pinnedTopRowData', [inputRow]);
+        setPinnedRowData({});
+        gridRef.current?.api.setGridOption('pinnedTopRowData', [pinnedRowData]);
 
         // Flash the newly added row to draw attention
         // Note: add delay to ensure transaction & updates complete
@@ -146,7 +151,7 @@ const App: React.FC = () => {
         }, 100);
       }
     },
-    [inputRow]
+    [pinnedRowData]
   );
 
   return (
@@ -157,7 +162,7 @@ const App: React.FC = () => {
           rowData={rowData}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
-          pinnedTopRowData={[inputRow]}
+          pinnedTopRowData={[pinnedRowData]}
           rowNumbers={rowNumbersOptions}
           onCellEditingStopped={onCellEditingStopped}
         />
