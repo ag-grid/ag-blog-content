@@ -31,8 +31,7 @@ interface AthleteData {
 })
 export class App implements OnInit {
   public rowData: AthleteData[] = [];
-  public inputRow: Partial<AthleteData> = {};
-  public pinnedTopRowData: Partial<AthleteData>[] = [{}];
+  public inputRow: Partial<AthleteData>[] = [{}];
   public columnDefs: ColDef<AthleteData>[] = [];
   public defaultColDef: ColDef = {};
 
@@ -125,45 +124,41 @@ export class App implements OnInit {
     return params.value;
   }
 
+  // Check all pinned row cells have a value
+  isInputRowComplete = () => {
+    return this.columnDefs.every((colDef) => {
+      const field = colDef.field;
+      if (field) {
+        const value = this.inputRow[0][field];
+        return value !== undefined && value !== null && value !== '';
+      }
+      return false;
+    });
+  };
+
   public onCellEditingStopped(params: CellEditingStoppedEvent): void {
+    // Only handle pinned row edits
     if (params.rowPinned !== 'top') return;
 
-    const field = params.colDef.field as keyof AthleteData;
-    this.inputRow = { ...this.inputRow, [field]: params.newValue };
+    // Check all pinned row cells have values
+    if (!this.isInputRowComplete()) return;
 
-    // Update the pinned row data to reflect the changes
-    this.pinnedTopRowData = [this.inputRow];
-
-    // Check if all fields are filled
-    const requiredFields: (keyof AthleteData)[] = [
-      'athlete',
-      'sport',
-      'date',
-      'age',
-    ];
-    const isComplete = requiredFields.every((fieldName) => {
-      const value = this.inputRow[fieldName];
-      return value !== undefined && value !== null && value !== '';
+    // Add new row to data
+    const transaction = this.gridApi.applyTransaction({
+      add: [this.inputRow[0]],
     });
 
-    if (isComplete) {
-      // Add new row to data
-      const newRow = this.inputRow as AthleteData;
-      this.rowData = [...this.rowData, newRow];
+    // Reset input row
+    this.inputRow[0] = {};
+    this.gridApi.setGridOption('pinnedTopRowData', [this.inputRow[0]]);
 
-      // Flash the newly added row
-      setTimeout(() => {
-        this.gridApi.forEachNode((node: any) => {
-          if (node.data === newRow) {
-            this.gridApi.flashCells({ rowNodes: [node] });
-          }
-        });
-      }, 100);
-
-      // Reset input row
-      this.inputRow = {};
-      this.pinnedTopRowData = [this.inputRow];
-    }
+    // Flash the newly added row to draw attention
+    // Note: add delay to ensure transaction & updates complete
+    setTimeout(() => {
+      this.gridApi.flashCells({
+        rowNodes: transaction?.add,
+      });
+    }, 100);
   }
 
   public rowNumbersFormatter = (params: ValueFormatterParams): string => {

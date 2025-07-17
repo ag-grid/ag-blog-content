@@ -84,7 +84,7 @@ function onCellEditingStopped(params) {
 
     // Flash the newly added row to draw attention
     gridApi.flashCells({
-      rowNodes: transaction.add,
+      rowNodes: transaction?.add,
     });
 
     // Reset the input row for next entry
