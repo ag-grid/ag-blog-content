@@ -5,8 +5,10 @@
  * pinned row feature. Users can add new rows by filling in the top row.
  */
 
-// State management - keep track of the input row being edited
-let inputRow = {};
+// Store Data Entered Into Pinned Row Cells (Auto updated by Grid)
+let pinnedRowData = {};
+
+// Store reference to Grid API for use throughout the demo
 let gridApi;
 
 // Fetches and processes data from the demo API
@@ -56,42 +58,41 @@ const valueFormatter = (params) => {
 };
 
 // Called when the grid is ready - initialize API and load data
-function onGridReady(params) {
-  gridApi = params.api;
+const onGridReady = () => {
   loadData();
-}
+};
 
 // Checks if all required fields in the pinned row are filled
-function isInputRowComplete() {
+const isPinnedRowDataComplete = () => {
   return columnDefs.every((colDef) => {
     const field = colDef.field;
-    const value = inputRow[field];
+    const value = pinnedRowData[field];
     return value !== undefined && value !== null && value !== '';
   });
-}
+};
 
 // Handles cell editing completion - adds new row when input is complete
-function onCellEditingStopped(params) {
+const onCellEditingStopped = (params) => {
   // Only process pinned row edits
   if (params.rowPinned !== 'top') return;
 
-  // If all fields are filled, add the new row to the grid
-  if (isInputRowComplete()) {
-    // Add the new row to the grid data
-    const transaction = gridApi.applyTransaction({
-      add: [inputRow],
-    });
+  // Check all pinned row cells have a value
+  if (!isPinnedRowDataComplete()) return;
 
-    // Flash the newly added row to draw attention
-    gridApi.flashCells({
-      rowNodes: transaction?.add,
-    });
+  // Add the new row to the grid data
+  const transaction = gridApi.applyTransaction({
+    add: [pinnedRowData],
+  });
 
-    // Reset the input row for next entry
-    inputRow = {};
-    gridApi.setGridOption('pinnedTopRowData', [inputRow]);
-  }
-}
+  // Flash the newly added row to draw attention
+  gridApi.flashCells({
+    rowNodes: transaction?.add,
+  });
+
+  // Reset the input row for next entry
+  pinnedRowData = {};
+  gridApi.setGridOption('pinnedTopRowData', [pinnedRowData]);
+};
 
 // Show row numbers for non-pinned rows
 const rowNumberOptions = {
@@ -145,7 +146,7 @@ const defaultColDef = {
 const gridOptions = {
   columnDefs,
   defaultColDef,
-  pinnedTopRowData: [inputRow], // Pin an empty row at the top for data entry
+  pinnedTopRowData: [pinnedRowData], // Pin an empty row at the top for data entry
   rowNumbers: rowNumberOptions, // Show row numbers for non-pinned rows
   onGridReady, // Init API & fetch data
   onCellEditingStopped, // Listen for pinned row edits
@@ -154,5 +155,5 @@ const gridOptions = {
 // Init Grid on Page Load
 document.addEventListener('DOMContentLoaded', () => {
   const gridDiv = document.querySelector('#myGrid');
-  agGrid.createGrid(gridDiv, gridOptions);
+  gridApi = agGrid.createGrid(gridDiv, gridOptions);
 });
