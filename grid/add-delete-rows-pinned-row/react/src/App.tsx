@@ -51,7 +51,7 @@ const App: React.FC = () => {
 
   const isEmptyPinnedCell = useCallback((params: ValueFormatterParams) => {
     return (
-      params.node.rowPinned === 'top' &&
+      params.node?.rowPinned === 'top' &&
       (params.value == null || params.value === '')
     );
   }, []);
