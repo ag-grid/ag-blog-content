@@ -83,6 +83,18 @@ const valueFormatter = (params: ValueFormatterParams) => {
   return params.value;
 };
 
+  // Check all pinned row cells have a value
+  const isInputRowComplete = () => {
+    return columnDefs.every((colDef) => {
+      const field = colDef.field;
+      if (field) {
+        const value = inputRow[field];
+        return value !== undefined && value !== null && value !== '';
+      }
+      return false;
+    });
+  };
+
 /**
  * Handles cell editing completion in the pinned top row
  * When all required fields are filled, adds a new row to the grid
@@ -93,42 +105,25 @@ const onCellEditingStopped = (params: CellEditingStoppedEvent) => {
     // Only process edits in the pinned top row
     if (params.rowPinned !== 'top') return;
 
-    const field = params.colDef.field as keyof AthleteData;
-    Object.assign(inputRow, { [field]: params.newValue });
-
-    // Check if all required fields are filled
-    const requiredFields: (keyof AthleteData)[] = [
-      'athlete',
-      'sport',
-      'date',
-      'age',
-    ];
-    const isComplete = requiredFields.every((fieldName) => {
-      const value = inputRow[fieldName];
-      return value !== undefined && value !== null && value !== '';
-    });
-
-    if (isComplete) {
+    if (isInputRowComplete()) {
       // Add new row to data
-      const newRow = { ...inputRow } as AthleteData;
-      rowData.value = [...rowData.value, newRow];
+      const transaction = gridRef?.value?.api.applyTransaction({
+          add: [inputRow],
+        });
 
-      // Flash the newly added row to highlight the addition
-      const api = gridRef.value?.api;
-      if (api) {
-        setTimeout(() => {
-          api.forEachNode((node: any) => {
-            if (node.data === newRow) {
-              api.flashCells({ rowNodes: [node] });
-            }
-          });
-        }, 100);
-      }
-
-      // Reset input row for next entry
+        // Reset input row
       Object.keys(inputRow).forEach(key => {
         delete inputRow[key as keyof AthleteData];
       });
+      gridRef?.value?.api.setGridOption('pinnedTopRowData', [inputRow]);
+
+      // Flash the newly added row to draw attention
+      // Note: add delay to ensure transaction & updates complete
+      setTimeout(() => {
+        gridRef.value?.api.flashCells({
+          rowNodes: transaction?.add,
+        });
+      }, 100);
     }
   } catch (error) {
     console.error('Error handling cell edit:', error);
