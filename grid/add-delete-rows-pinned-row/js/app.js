@@ -75,9 +75,6 @@ function onCellEditingStopped(params) {
   // Only process pinned row edits
   if (params.rowPinned !== 'top') return;
 
-  // Update the input row with the new value
-  inputRow[params.colDef.field] = params.newValue;
-
   // If all fields are filled, add the new row to the grid
   if (isInputRowComplete()) {
     // Add the new row to the grid data
