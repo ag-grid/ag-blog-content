@@ -1,33 +1,40 @@
-# vue
+# AG Grid Add/Delete Rows with Pinned Row - Vue TypeScript
 
-This template should help get you started developing with Vue 3 in Vite.
+This demo shows how to implement a data entry form using AG Grid's pinned row feature in Vue 3 with TypeScript. Users can add new rows by filling in the top row.
 
-## Recommended IDE Setup
+## Features
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Pinned Row Input**: Top row acts as a form for adding new data
+- **Auto-submission**: New rows are automatically added when all fields are complete
+- **Visual Feedback**: Pending edits are highlighted with orange styling
+- **Cell Flashing**: Newly added rows are flashed after being added
 
-## Type Support for `.vue` Imports in TS
+## Running the Demo
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```bash
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Project Structure
 
-```sh
-npm run build
 ```
+src/
+├── components/
+│   └── SportRenderer.vue    # Custom cell renderer for sport icons
+├── utils/
+│   └── dateUtils.ts         # Date formatting utilities
+├── types.ts                 # TypeScript type definitions
+├── App.vue                  # Main grid component
+├── assets/
+│   └── main.css             # Grid styling
+└── main.ts                  # Entry point with Font Awesome setup
+```
+
+## Key Technologies
+
+- **AG Grid Vue**: Data grid component
+- **Vue 3**: Modern progressive framework
+- **TypeScript**: Type safety
+- **Vite**: Build tool and dev server
+- **Font Awesome**: Icons for sports

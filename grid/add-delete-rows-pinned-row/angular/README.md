@@ -1,4 +1,4 @@
-# AG Grid Add/Delete Rows with Pinned Row - Angular
+# AG Grid Add/Delete Rows with Pinned Row - Angular TypeScript
 
 This demo shows how to implement a data entry form using AG Grid's pinned row feature in Angular with TypeScript. Users can add new rows by filling in the top row.
 
@@ -7,18 +7,14 @@ This demo shows how to implement a data entry form using AG Grid's pinned row fe
 - **Pinned Row Input**: Top row acts as a form for adding new data
 - **Auto-submission**: New rows are automatically added when all fields are complete
 - **Visual Feedback**: Pending edits are highlighted with orange styling
-- **Sport Icons**: Custom renderer with Font Awesome icons
-- **Date Handling**: Built-in date picker with proper formatting
-- **TypeScript**: Full type safety and IntelliSense support
+- **Cell Flashing**: Newly added rows are flashed after being added
 
 ## Running the Demo
 
 ```bash
 npm install
-npm start
+ng serve
 ```
-
-The application will be available at `http://localhost:4200/`.
 
 ## Project Structure
 
@@ -26,7 +22,7 @@ The application will be available at `http://localhost:4200/`.
 src/
 ├── app/
 │   ├── components/
-│   │   └── sport-renderer.component.ts    # Custom cell renderer
+│   │   └── sport-renderer.component.ts    # Custom cell renderer for sport icons
 │   ├── utils/
 │   │   └── date-utils.ts                 # Date formatting utilities
 │   ├── app.ts                            # Main app component
@@ -38,15 +34,7 @@ src/
 
 ## Key Technologies
 
-- **Angular**: Modern web framework
 - **AG Grid Angular**: Data grid component
+- **Angular**: Modern web framework
 - **TypeScript**: Type safety
 - **Font Awesome**: Icons for sports
-
-## Building
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory.

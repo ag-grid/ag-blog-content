@@ -7,9 +7,7 @@ This demo shows how to implement a data entry form using AG Grid's pinned row fe
 - **Pinned Row Input**: Top row acts as a form for adding new data
 - **Auto-submission**: New rows are automatically added when all fields are complete
 - **Visual Feedback**: Pending edits are highlighted with orange styling
-- **Sport Icons**: Custom renderer with Font Awesome icons
-- **Date Handling**: Built-in date picker with proper formatting
-- **TypeScript**: Full type safety and IntelliSense support
+- **Cell Flashing**: Newly added rows are flashed after being added
 
 ## Running the Demo
 
