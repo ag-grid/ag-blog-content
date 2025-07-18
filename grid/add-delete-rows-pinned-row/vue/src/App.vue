@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * AG Grid Add Rows with Pinned Row Demo
+ *
+ * This demo shows how to implement a data entry form using AG Grid's
+ * pinned row feature. Users can add new rows by filling in the top row.
+ */
 import { ref, reactive, onMounted } from 'vue';
 import { AgGridVue } from 'ag-grid-vue3';
 import {
@@ -16,48 +22,43 @@ import './assets/main.css';
 // Register all AG Grid modules for enterprise features and charts
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 
-// State to hold the grid data fetched from API
+// Store rowData, fetched from external API
 const rowData = ref<AthleteData[]>([]);
 
-// Reactive object for the pinned row input
-const inputRow = reactive<Partial<AthleteData>>({});
+// Store Data Entered Into Pinned Row Cells (Auto updated by Grid)
+const pinnedRowData = reactive<Partial<AthleteData>>({});
 
-// Grid component reference
+// Store reference to Grid API for use throughout the demo
 const gridRef = ref();
 
-// Fetch Olympic data on component mount
+// Load data on component mount
 onMounted(() => {
   loadData();
 });
 
-/**
- * Loads athlete data from the AG Grid example API
- * Filters to a sample of 3 records and parses dates
- */
+// Fetches and processes data from the demo API
 const loadData = async () => {
   try {
+    // Fetch & Parse Data
     const response = await fetch(
       'https://www.ag-grid.com/example-assets/olympic-winners.json'
     );
     const data = await response.json();
 
-    // Take a sample of records and parse date strings to Date objects
+    // Take a small sample and convert date strings to Date objects
     const sampleData = data.slice(3, 6).map((item: any) => ({
       ...item,
       date: parseDate(item.date),
     }));
 
+    // Set Row Data
     rowData.value = sampleData;
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Failed to load data:', error);
   }
 };
 
-/**
- * Checks if a cell in the pinned top row is empty
- * @param params - Value formatter parameters from AG Grid
- * @returns True if the cell is in the pinned row and has no value
- */
+// Checks if a cell in the pinned row is empty
 const isEmptyPinnedCell = (params: ValueFormatterParams) => {
   return (
     params.node?.rowPinned === 'top' &&
@@ -65,57 +66,50 @@ const isEmptyPinnedCell = (params: ValueFormatterParams) => {
   );
 };
 
-/**
- * Formats cell values, showing placeholder text for empty pinned cells
- * and properly formatting dates
- * @param params - Value formatter parameters from AG Grid
- * @returns Formatted value string
- */
+// Custom value formatter that handles both placeholders and data display
 const valueFormatter = (params: ValueFormatterParams) => {
+  // Show placeholder for empty pinned cells
   if (isEmptyPinnedCell(params)) {
     return `${params.colDef.headerName}...`;
   }
 
+  // Format dates for display
   if (params.colDef.field === 'date') {
     return formatDate(params.value);
   }
 
+  // Return plain value for all other cells
   return params.value;
 };
 
-  // Check all pinned row cells have a value
-  const isInputRowComplete = () => {
+  // Checks if all required fields in the pinned row are filled
+  const isPinnedRowDataComplete = () => {
     return columnDefs.every((colDef) => {
-      const field = colDef.field;
-      if (field) {
-        const value = inputRow[field];
-        return value !== undefined && value !== null && value !== '';
-      }
-      return false;
+      if (!colDef.field) return false;
+
+      const v = pinnedRowData[colDef.field!];
+      return v != null && v !== '';
     });
   };
 
-/**
- * Handles cell editing completion in the pinned top row
- * When all required fields are filled, adds a new row to the grid
- * @param params - Cell editing stopped event parameters
- */
+// Handles cell editing completion - adds new row when input is complete
 const onCellEditingStopped = (params: CellEditingStoppedEvent) => {
   try {
-    // Only process edits in the pinned top row
+    // Only process pinned row edits
     if (params.rowPinned !== 'top') return;
 
-    if (isInputRowComplete()) {
-      // Add new row to data
+    // Check all pinned row cells have a value
+    if (isPinnedRowDataComplete()) {
+      // Add the new row to the grid data
       const transaction = gridRef?.value?.api.applyTransaction({
-          add: [inputRow],
+          add: [pinnedRowData],
         });
 
-        // Reset input row
-      Object.keys(inputRow).forEach(key => {
-        delete inputRow[key as keyof AthleteData];
+        // Reset the input row for next entry
+      Object.keys(pinnedRowData).forEach(key => {
+        delete pinnedRowData[key as keyof AthleteData];
       });
-      gridRef?.value?.api.setGridOption('pinnedTopRowData', [inputRow]);
+      gridRef?.value?.api.setGridOption('pinnedTopRowData', [pinnedRowData]);
 
       // Flash the newly added row to draw attention
       // Note: add delay to ensure transaction & updates complete
@@ -130,7 +124,7 @@ const onCellEditingStopped = (params: CellEditingStoppedEvent) => {
   }
 };
 
-// Column definitions for the grid
+// Column definitions - specify fields, editors, and renderers
 const columnDefs: ColDef<AthleteData>[] = [
   {
     field: 'athlete',
@@ -149,32 +143,30 @@ const columnDefs: ColDef<AthleteData>[] = [
   {
     field: 'date',
     headerName: 'Date',
-    cellEditor: 'agDateCellEditor',
-    valueFormatter,
+    cellEditor: 'agDateCellEditor', // Built-in Date Cell Editor
+    valueFormatter, // Required, to override cellEditor formatter
   },
   {
     field: 'age',
     headerName: 'Age',
-    valueFormatter,
+    valueFormatter, // Required, to override cellEditor formatter
   },
 ];
 
 // Default column properties applied to all columns
+// Default column properties applied to all columns
 const defaultColDef: ColDef = {
-  flex: 1, // Columns will grow to fill available space
-  editable: true, // All cells are editable
+  flex: 1,
+  editable: true,
   valueFormatter,
   cellClassRules: {
+    // Apply CSS Class to Pinned Cells with User Edits
     'pinned-cell-editing': (params: any) =>
       params.node.rowPinned && params.value,
   },
 };
 
-/**
- * Formats row numbers, hiding them for pinned rows
- * @param params - Value formatter parameters
- * @returns Empty string for pinned rows, otherwise the row number
- */
+// Show row numbers for non-pinned rows
 const rowNumbersFormatter = (params: ValueFormatterParams) => {
   return params?.node?.rowPinned ? '' : params?.value;
 };
@@ -187,7 +179,7 @@ const rowNumbersFormatter = (params: ValueFormatterParams) => {
       :rowData="rowData"
       :columnDefs="columnDefs"
       :defaultColDef="defaultColDef"
-      :pinnedTopRowData="[inputRow]"
+      :pinnedTopRowData="[pinnedRowData]"
       :rowNumbers="{ valueFormatter: rowNumbersFormatter }"
       @cell-editing-stopped="onCellEditingStopped"
       style="width: 100%; height: 100%"
