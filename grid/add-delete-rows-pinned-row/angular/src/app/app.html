@@ -1,0 +1,12 @@
+<div>
+  <ag-grid-angular
+    style="height: 100vh;"
+    [rowData]="rowData"
+    [columnDefs]="columnDefs"
+    [defaultColDef]="defaultColDef"
+    [pinnedTopRowData]="[pinnedRowData]"
+    [rowNumbers]="{ valueFormatter: rowNumbersFormatter }"
+    (gridReady)="onGridReady($event)"
+    (cellEditingStopped)="onCellEditingStopped($event)"
+  />
+</div>
