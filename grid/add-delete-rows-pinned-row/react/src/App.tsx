@@ -1,3 +1,10 @@
+/**
+ * AG Grid Add Rows with Pinned Row Demo
+ *
+ * This demo shows how to implement a data entry form using AG Grid's
+ * pinned row feature. Users can add new rows by filling in the top row.
+ */
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import type { AthleteData } from './utils/types';
@@ -16,7 +23,7 @@ import './App.css';
 // Register all AG Grid modules for enterprise features and charts
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 
-// Validate pinned cell values
+// Checks if a cell in the pinned row is empty
 const isEmptyPinnedCell = (params: ValueFormatterParams) => {
   return (
     params.node?.rowPinned === 'top' &&
@@ -24,26 +31,30 @@ const isEmptyPinnedCell = (params: ValueFormatterParams) => {
   );
 };
 
-// Format pinned row placeholders
+// Custom value formatter that handles both placeholders and data display
 const valueFormatter = (params: ValueFormatterParams) => {
+  // Show placeholder for empty pinned cells
   if (isEmptyPinnedCell(params)) {
     return `${params.colDef.headerName}...`;
   }
 
+  // Format dates for display
   if (params.colDef.field === 'date') {
     return formatDate(params.value);
   }
 
+  // Return plain value for all other cells
   return params.value;
 };
 
-// Hide row number for pinned rows
+// Show row numbers for non-pinned rows
 const rowNumbersOptions = {
   valueFormatter: (params: ValueFormatterParams) => {
     return params?.node?.rowPinned ? '' : params?.value;
   },
 };
 
+// Apply CSS Class to Pinned Cells with User Edits
 const cellClassRules = {
   'pinned-cell-editing': (params: CellClassParams) =>
     params?.node?.rowPinned && params.value,
@@ -52,11 +63,12 @@ const cellClassRules = {
 const App: React.FC = () => {
   // Store rowData, fetched from external API
   const [rowData, setRowData] = useState<AthleteData[]>();
-  // Store Pinned Row Data, which is automatically updated by the Grid
+  // Store Data Entered Into Pinned Row Cells (Auto updated by Grid)
   const [pinnedRowData, setPinnedRowData] = useState<Partial<AthleteData>>({});
-  // Store reference to the grid, to access the API
+  // Store reference to Grid API for use throughout the demo
   const gridRef = useRef<AgGridReact>(null);
 
+  // Column definitions - specify fields, editors, and renderers
   const columnDefs: ColDef<AthleteData>[] = [
     {
       field: 'athlete',
@@ -75,16 +87,17 @@ const App: React.FC = () => {
     {
       field: 'date',
       headerName: 'Date',
-      cellEditor: 'agDateCellEditor',
-      valueFormatter,
+      cellEditor: 'agDateCellEditor', // Built-in Date Cell Editor
+      valueFormatter, // Required, to override cellEditor formatter
     },
     {
       field: 'age',
       headerName: 'Age',
-      valueFormatter,
+      valueFormatter, // Required, to override cellEditor formatter
     },
   ];
 
+  // Default column properties applied to all columns
   const defaultColDef: ColDef = {
     flex: 1,
     editable: true,
@@ -94,18 +107,22 @@ const App: React.FC = () => {
 
   // Load data on component mount
   useEffect(() => {
+    // Fetches and processes data from the demo API
     const fetchData = async () => {
       try {
+        // Fetch & Parse Data
         const response = await fetch(
           'https://www.ag-grid.com/example-assets/olympic-winners.json'
         );
         const data = await response.json();
 
+        // Take a small sample and convert date strings to Date objects
         const sampleData = data.slice(3, 6).map((item: any) => ({
           ...item,
           date: parseDate(item.date),
         }));
 
+        // Set Row Data
         setRowData(sampleData);
       } catch (error) {
         console.error('Failed to load data:', error);
@@ -114,31 +131,30 @@ const App: React.FC = () => {
     fetchData();
   }, []);
 
-  // Check all pinned row cells have a value
+  // Checks if all required fields in the pinned row are filled
   const isPinnedRowComplete = () => {
     return columnDefs.every((colDef) => {
-      // Ignore edits if pinned row does not contain all columns
       if (!colDef.field) return false;
 
-      // Ignore edits if pinned row cell value is undefined
       const v = pinnedRowData[colDef.field!];
       return v != null && v !== '';
     });
   };
 
+  // Handles cell editing completion - adds new row when input is complete
   const onCellEditingStopped = useCallback(
     (params: CellEditingStoppedEvent) => {
-      // Only handle pinned row edits
+      // Only process pinned row edits
       if (params.rowPinned !== 'top') return;
 
       // Check all pinned row cells have a value
       if (isPinnedRowComplete()) {
-        // Add new row to data
+        // Add the new row to the grid data
         const transaction = gridRef.current?.api.applyTransaction({
           add: [pinnedRowData],
         });
 
-        // Reset input row
+        // Reset the input row for next entry
         setPinnedRowData({});
         gridRef.current?.api.setGridOption('pinnedTopRowData', [pinnedRowData]);
 
@@ -162,9 +178,9 @@ const App: React.FC = () => {
           rowData={rowData}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
-          pinnedTopRowData={[pinnedRowData]}
-          rowNumbers={rowNumbersOptions}
-          onCellEditingStopped={onCellEditingStopped}
+          pinnedTopRowData={[pinnedRowData]} // Pin an empty row at the top for data entry
+          rowNumbers={rowNumbersOptions} // Show row numbers for non-pinned rows
+          onCellEditingStopped={onCellEditingStopped} // Listen for pinned row edits
         />
       </div>
     </div>

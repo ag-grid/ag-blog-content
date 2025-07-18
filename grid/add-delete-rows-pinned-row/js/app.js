@@ -1,5 +1,5 @@
 /**
- * AG Grid Add/Delete Rows with Pinned Row Demo
+ * AG Grid Add Rows with Pinned Row Demo
  *
  * This demo shows how to implement a data entry form using AG Grid's
  * pinned row feature. Users can add new rows by filling in the top row.
