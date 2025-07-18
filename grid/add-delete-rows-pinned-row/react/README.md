@@ -2,6 +2,10 @@
 
 This demo shows how to implement a data entry form using AG Grid's pinned row feature in React with TypeScript. Users can add new rows by filling in the top row.
 
+## Full Tutorial
+
+[Add new rows using a pinned row at the top of the grid](https://blog.ag-grid.com/add-new-rows-using-a-pinned-row-at-the-top-of-the-grid/)
+
 ## Features
 
 - **Pinned Row Input**: Top row acts as a form for adding new data

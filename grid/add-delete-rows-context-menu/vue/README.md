@@ -1,33 +1,41 @@
-# vue
+# AG Grid Add/Delete Rows via Context Menu - Vue TypeScript
 
-This template should help get you started developing with Vue 3 in Vite.
+This demo shows how to programmatically add and delete rows in AG Grid using custom context menu actions with AG Grid Enterprise features in Vue 3 with TypeScript.
 
-## Recommended IDE Setup
+## Full Tutorial
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+[How To Add and Delete Rows in AG Grid from the Context Menu](https://blog.ag-grid.com/how-to-add-and-delete-rows-in-ag-grid-from-the-context-menu/)
 
-## Type Support for `.vue` Imports in TS
+## Features
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- **Custom Context Menu**: Right-click functionality with custom menu items
+- **Insert Above/Below**: Add new rows relative to the selected cell position
+- **Delete Selected Rows**: Remove one or multiple selected rows
+- **Dynamic Menu Labels**: Shows the count of selected rows in menu items
+- **Full Row Editing**: Automatically activates editing mode for newly added rows
 
-## Customize configuration
+## Running the Demo
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```bash
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Project Structure
 
-```sh
-npm run build
 ```
+src/
+├── App.vue                  # Main grid component with context menu
+├── assets/
+│   ├── base.css            # Base styles
+│   └── main.css            # Main styles
+├── main.ts                  # Entry point
+└── types.ts                 # TypeScript type definitions
+```
+
+## Key Technologies
+
+- **AG Grid Vue**: Data grid component
+- **AG Grid Enterprise**: Context menu and advanced features
+- **TypeScript**: Type safety
+- **Vite**: Build tool and dev server

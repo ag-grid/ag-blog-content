@@ -1,6 +1,6 @@
-# AG Grid Add/Delete Rows via Context Menu - React TypeScript
+# AG Grid Add/Delete Rows via Context Menu - JavaScript
 
-This demo shows how to programmatically add and delete rows in AG Grid using custom context menu actions with AG Grid Enterprise features in React with TypeScript.
+This demo shows how to programmatically add and delete rows in AG Grid using custom context menu actions with AG Grid Enterprise features in vanilla JavaScript.
 
 ## Full Tutorial
 
@@ -17,23 +17,19 @@ This demo shows how to programmatically add and delete rows in AG Grid using cus
 ## Running the Demo
 
 ```bash
-npm install
-npm run dev
+# No build step required - open directly in browser
+open index.html
 ```
 
 ## Project Structure
 
 ```
-src/
-├── App.tsx                  # Main grid component with context menu
-├── main.tsx                 # Entry point
-├── types.ts                 # TypeScript type definitions
-└── vite-env.d.ts           # Vite environment types
+├── app.js                   # Main grid implementation with context menu
+└── index.html               # HTML entry point
 ```
 
 ## Key Technologies
 
-- **AG Grid React**: Data grid component
+- **AG Grid JavaScript**: Data grid component
 - **AG Grid Enterprise**: Context menu and advanced features
-- **TypeScript**: Type safety
-- **Vite**: Build tool and dev server
+- **Vanilla JavaScript**: No framework dependencies

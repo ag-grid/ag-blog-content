@@ -2,6 +2,10 @@
 
 This demo shows how to implement a data entry form using AG Grid's pinned row feature in Vue 3 with TypeScript. Users can add new rows by filling in the top row.
 
+## Full Tutorial
+
+[Add new rows using a pinned row at the top of the grid](https://blog.ag-grid.com/add-new-rows-using-a-pinned-row-at-the-top-of-the-grid/)
+
 ## Features
 
 - **Pinned Row Input**: Top row acts as a form for adding new data
@@ -34,7 +38,6 @@ src/
 ## Key Technologies
 
 - **AG Grid Vue**: Data grid component
-- **Vue 3**: Modern progressive framework
 - **TypeScript**: Type safety
 - **Vite**: Build tool and dev server
 - **Font Awesome**: Icons for sports

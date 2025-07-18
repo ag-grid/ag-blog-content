@@ -1,59 +1,44 @@
-# Angular
+# AG Grid Add/Delete Rows via Context Menu - Angular TypeScript
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
+This demo shows how to programmatically add and delete rows in AG Grid using custom context menu actions with AG Grid Enterprise features in Angular with TypeScript.
 
-## Development server
+## Full Tutorial
 
-To start a local development server, run:
+[How To Add and Delete Rows in AG Grid from the Context Menu](https://blog.ag-grid.com/how-to-add-and-delete-rows-in-ag-grid-from-the-context-menu/)
 
-```bash
-ng serve
-```
+## Features
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **Custom Context Menu**: Right-click functionality with custom menu items
+- **Insert Above/Below**: Add new rows relative to the selected cell position
+- **Delete Selected Rows**: Remove one or multiple selected rows
+- **Dynamic Menu Labels**: Shows the count of selected rows in menu items
+- **Full Row Editing**: Automatically activates editing mode for newly added rows
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Running the Demo
 
 ```bash
-ng generate --help
+npm install
+npm run dev
 ```
 
-## Building
+## Project Structure
 
-To build the project run:
-
-```bash
-ng build
+```
+src/
+├── app/
+│   ├── app.component.ts     # Main grid component with context menu
+│   ├── app.component.html   # Template
+│   ├── app.component.css    # Styles
+│   ├── app.config.ts        # Angular configuration
+│   └── types.ts             # TypeScript type definitions
+├── index.html               # Main HTML file
+├── main.ts                  # Entry point
+└── styles.css               # Global styles
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Key Technologies
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- **AG Grid Angular**: Data grid component
+- **AG Grid Enterprise**: Context menu and advanced features
+- **TypeScript**: Type safety
+- **Angular CLI**: Build tool and dev server
