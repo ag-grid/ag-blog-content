@@ -4,7 +4,7 @@
     [rowData]="rowData"
     [columnDefs]="columnDefs"
     [defaultColDef]="defaultColDef"
-    [pinnedTopRowData]="inputRow"
+    [pinnedTopRowData]="[pinnedRowData]"
     [rowNumbers]="{ valueFormatter: rowNumbersFormatter }"
     (gridReady)="onGridReady($event)"
     (cellEditingStopped)="onCellEditingStopped($event)"

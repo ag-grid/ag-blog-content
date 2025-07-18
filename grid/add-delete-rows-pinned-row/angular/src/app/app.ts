@@ -31,7 +31,7 @@ interface AthleteData {
 })
 export class App implements OnInit {
   public rowData: AthleteData[] = [];
-  public inputRow: Partial<AthleteData>[] = [{}];
+  public pinnedRowData: Partial<AthleteData> = {};
   public columnDefs: ColDef<AthleteData>[] = [];
   public defaultColDef: ColDef = {};
 
@@ -125,14 +125,12 @@ export class App implements OnInit {
   }
 
   // Check all pinned row cells have a value
-  isInputRowComplete = () => {
+  isPinnedRowDataComplete = () => {
     return this.columnDefs.every((colDef) => {
-      const field = colDef.field;
-      if (field) {
-        const value = this.inputRow[0][field];
-        return value !== undefined && value !== null && value !== '';
-      }
-      return false;
+      if (!colDef.field) return false;
+
+      const v = this.pinnedRowData[colDef.field!];
+      return v != null && v !== '';
     });
   };
 
@@ -141,16 +139,16 @@ export class App implements OnInit {
     if (params.rowPinned !== 'top') return;
 
     // Check all pinned row cells have values
-    if (!this.isInputRowComplete()) return;
+    if (!this.isPinnedRowDataComplete()) return;
 
     // Add new row to data
     const transaction = this.gridApi.applyTransaction({
-      add: [this.inputRow[0]],
+      add: [this.pinnedRowData],
     });
 
     // Reset input row
-    this.inputRow[0] = {};
-    this.gridApi.setGridOption('pinnedTopRowData', [this.inputRow[0]]);
+    this.pinnedRowData = {};
+    this.gridApi.setGridOption('pinnedTopRowData', [this.pinnedRowData]);
 
     // Flash the newly added row to draw attention
     // Note: add delay to ensure transaction & updates complete
