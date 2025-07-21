@@ -12,8 +12,8 @@ export interface IOlympicData {
 }
 
 export interface ICellSelectionBounds {
-  cellRangeStartRowIndex: number;
-  cellRangeEndRowIndex: number;
+  startIndex: number;
+  endIndex: number;
   rowCount: number;
 }
 
