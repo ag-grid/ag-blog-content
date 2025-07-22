@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { AgGridVue } from 'ag-grid-vue3';
 import {
   type ColDef,
@@ -11,17 +11,13 @@ import {
   type GridReadyEvent,
 } from 'ag-grid-community';
 import { AllEnterpriseModule } from 'ag-grid-enterprise';
-import type {
-  IOlympicData,
-  AddRowPosition,
-  ICellSelectionBounds,
-} from './types';
+import type { IOlympicData, ICellSelectionBounds } from './types';
 
 // Register all AG Grid modules for enterprise features and charts
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 
 // State to hold the grid data fetched from API
-const rowData = ref<IOlympicData[]>([]);
+const rowData = ref<IOlympicData[] | undefined>(undefined);
 
 // Grid API reference
 const gridApi = ref<GridApi | null>(null);
@@ -42,10 +38,9 @@ const columnDefs: ColDef[] = [
 
 // Default column properties applied to all columns
 const defaultColDef: ColDef = {
-  flex: 1, // Columns will grow to fill available space
-  minWidth: 100, // Minimum column width
-  editable: true, // All cells are editable
-  resizable: true, // Columns can be resized
+  flex: 1,
+  minWidth: 100,
+  editable: true,
 };
 
 // Grid options
@@ -53,182 +48,148 @@ const editType = 'fullRow';
 const cellSelection = true;
 const rowNumbers = true;
 
-// Grid ready event handler
-const onGridReady = (params: GridReadyEvent) => {
+const onGridReady = async (params: GridReadyEvent) => {
+  // Set API
   gridApi.value = params.api;
+
+  // Fetch Data
+  const response = await fetch(
+    'https://www.ag-grid.com/example-assets/olympic-winners.json'
+  );
+  const json = await response.json();
+  rowData.value = json;
 };
 
-// Fetch Olympic data on component mount
-onMounted(async () => {
-  try {
-    const response = await fetch(
-      'https://www.ag-grid.com/example-assets/olympic-winners.json'
-    );
-    const json = await response.json();
-    rowData.value = json;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-});
-
 /**
- * Extracts information about the currently selected cell range
- * @returns Object with start/end row indices and count, or undefined if no selection
+ * Extracts information about the currently selected cell range or clicked row
+ *
+ * If a cell range is selected, returns normalized start/end indices and a row count.
+ * If no range is selected, returns the index of the rowNode the user clicked on
  */
-const getCellSelectionBounds = (): ICellSelectionBounds | undefined => {
-  try {
-    // Get & Validate Cell Ranges
-    const cellRanges = gridApi.value?.getCellRanges();
-    if (!cellRanges || cellRanges.length < 0) throw 'No cells selected!';
-    if (!cellRanges[0].startRow || !cellRanges[0].endRow)
-      throw 'Could not find selected Cell Range';
+const getCellSelectionBounds = (
+  params: GetContextMenuItemsParams
+): ICellSelectionBounds => {
+  // Get cell ranges from the grid API
+  const cellRanges = gridApi.value?.getCellRanges();
 
-    // Get Start, End & Number of Cells Selected
-    const cellRangeStartRowIndex = cellRanges[0].startRow.rowIndex;
-    const cellRangeEndRowIndex = cellRanges[0].endRow.rowIndex;
-
-    // Calculate row count - add 1 to account for zero-based indexing
-    const rowCount =
-      Math.abs(cellRangeEndRowIndex - cellRangeStartRowIndex) + 1;
-
-    // Return data to custom context menu
-    return { cellRangeStartRowIndex, cellRangeEndRowIndex, rowCount };
-  } catch (e) {
-    console.error(e);
+  // Fallback to clicked row if no cell range is selected
+  if (!cellRanges || !cellRanges[0]?.startRow || !cellRanges[0]?.endRow) {
+    const rowIndex = params.node?.rowIndex || 0;
+    return { startIndex: rowIndex, endIndex: rowIndex, rowCount: 1 };
   }
+
+  // Extract row indices from the first cell range
+  const cellRangeStartRowIndex = cellRanges[0].startRow.rowIndex;
+  const cellRangeEndRowIndex = cellRanges[0].endRow.rowIndex;
+
+  // Calculate total rows in selection (inclusive)
+  const rowCount =
+    Math.abs(cellRangeEndRowIndex - cellRangeStartRowIndex) + 1;
+
+  // Normalize indices since selection can be made in either direction
+  const startIndex = Math.min(cellRangeStartRowIndex, cellRangeEndRowIndex);
+  const endIndex = Math.max(cellRangeStartRowIndex, cellRangeEndRowIndex);
+
+  // Return normalized selection bounds
+  return { startIndex, endIndex, rowCount };
+};
+
+// Clear selection and focus on the first new row for immediate editing
+const startEditingCell = (insertIndex: number, firstColumn: string) => {
+  gridApi.value?.clearCellSelection();
+  gridApi.value?.setFocusedCell(insertIndex, firstColumn);
+  gridApi.value?.startEditingCell({
+    rowIndex: insertIndex,
+    colKey: firstColumn,
+  });
 };
 
 /**
- * Adds empty rows to the grid based on the current cell selection
- * @param position - Whether to insert rows 'above' or 'below' the selection
- * @param cellSelectionBounds - Information about the selected cell range
+ * Adds X number of empty rows to the grid, either above or below the
+ * currently selected cell range, based on the number of selected rows.
  */
 const addRows = (
-  position: AddRowPosition,
-  cellSelectionBounds: ICellSelectionBounds
+  rowCount: number,
+  startIndex?: number,
+  endIndex?: number
 ) => {
-  try {
-    // Get Start / End Row Index from Cell Selection
-    const { cellRangeStartRowIndex, cellRangeEndRowIndex } =
-      cellSelectionBounds;
+  // Create empty row objects for insertion
+  const newRows = Array.from({ length: rowCount }, () => ({}));
 
-    // Create array of empty row objects matching the selection size
-    const newRows = Array(cellSelectionBounds.rowCount)
-      .fill(null)
-      .map(() => ({}));
+  // Determine insertion point
+  const insertIndex = startIndex || endIndex || 0;
 
-    // Calculate insertion index based on position
-    // 'above': insert at the minimum index
-    // 'below': insert after the maximum index
-    const insertIndex =
-      position === 'above'
-        ? Math.min(cellRangeStartRowIndex, cellRangeEndRowIndex)
-        : Math.max(cellRangeStartRowIndex, cellRangeEndRowIndex) + 1;
+  // Insert rows at the specified index
+  const result = gridApi.value?.applyTransaction({
+    add: newRows,
+    addIndex: insertIndex,
+  });
 
-    // Apply transaction to add new rows to the grid
-    const result = gridApi.value?.applyTransaction({
-      add: newRows,
-      addIndex: insertIndex,
+  // If rows are added, focus on and start editing first new cell
+  if (result && result?.add?.length > 0) {
+    // Wait for next frame to ensure grid has processed the transaction
+    requestAnimationFrame(() => {
+      startEditingCell(insertIndex, columnDefs[0].field || '');
     });
-
-    if (result && result?.add?.length > 0) {
-      // Delay to ensure DOM updates are complete
-      setTimeout(() => {
-        // Clear existing cell selection
-        gridApi.value?.clearCellSelection();
-        // Focus on the first cell of the first new row
-        gridApi.value?.setFocusedCell(
-          insertIndex,
-          columnDefs[0].field ?? ''
-        );
-        // Start editing mode (triggers full-row editing due to editType='fullRow')
-        gridApi.value?.startEditingCell({
-          rowIndex: insertIndex,
-          colKey: columnDefs[0]?.field ?? '',
-        });
-      }, 100);
-    }
-  } catch (error) {
-    console.error(`Error adding rows ${position}:`, error);
   }
 };
 
-/**
- * Deletes rows from the grid based on the current cell selection
- * @param cellSelectionBounds - Information about the selected cell range
- */
-const deleteRows = (cellSelectionBounds: ICellSelectionBounds) => {
-  try {
-    const { cellRangeStartRowIndex, cellRangeEndRowIndex } =
-      cellSelectionBounds;
-
-    // Determine the actual start and end indices (selection can be made in either direction)
-    const start = Math.min(cellRangeStartRowIndex, cellRangeEndRowIndex);
-    const end = Math.max(cellRangeStartRowIndex, cellRangeEndRowIndex);
-
-    // Collect all row data objects to be removed
-    const rowDataToRemove = [];
-    for (let i = start; i <= end; i++) {
-      const node = gridApi.value?.getDisplayedRowAtIndex(i);
-      if (node?.data) rowDataToRemove.push(node.data);
+// Deletes rows from the grid within the specified range
+const deleteRows = (startIndex: number, endIndex: number) => {
+  // Collect row data within the specified range
+  const rowDataToRemove = [];
+  for (let i = startIndex; i <= endIndex; i++) {
+    const node = gridApi.value?.getDisplayedRowAtIndex(i);
+    if (node?.data) {
+      rowDataToRemove.push(node.data);
     }
-
-    // Exit early if no rows to remove
-    if (rowDataToRemove.length === 0) return;
-
-    // Remove rows via transaction API
-    gridApi.value?.applyTransaction({ remove: rowDataToRemove });
-
-    // Clear any remaining cell selection
-    gridApi.value?.clearCellSelection();
-  } catch (error) {
-    console.error('Error deleting rows:', error);
   }
+
+  // Skip removal if no valid rows found
+  if (rowDataToRemove.length === 0) return;
+
+  // Remove collected rows from the grid
+  gridApi.value?.applyTransaction({ remove: rowDataToRemove });
+
+  // Clear selection after deletion
+  gridApi.value?.clearCellSelection();
 };
 
 /**
  * Builds custom context menu items based on cell selection:
  * Adds options for Adding rows above & below current selection
  * Adds option for deleting currently selected rows
- * @param params - Context menu parameters from AG-Grid
- * @returns Array of menu items including custom row operations and default items
  */
 const getContextMenuItems = (
   params: GetContextMenuItemsParams
 ): (DefaultMenuItem | MenuItemDef)[] => {
-  // Get information about the current cell selection
-  const cellSelectionBounds = getCellSelectionBounds();
+  // Get selection bounds (either from cell range or clicked row)
+  const { startIndex, endIndex, rowCount } = getCellSelectionBounds(params);
 
-  if (cellSelectionBounds) {
-    // Build dynamic label showing number of rows selected
-    const rowCount = cellSelectionBounds?.rowCount;
-    const rowLabel = `${rowCount} Row${rowCount !== 1 ? 's' : ''}`;
+  // Create pluralized label for menu items
+  const rowLabel = `${rowCount} Row${rowCount !== 1 ? 's' : ''}`;
 
-    // Return custom menu items for row operations
-    return [
-      {
-        name: `Insert ${rowLabel} Above`,
-        action: () => addRows('above', cellSelectionBounds),
-        icon: '<span class="ag-icon ag-icon-plus"></span>',
-      },
-      {
-        name: `Insert ${rowLabel} Below`,
-        action: () => addRows('below', cellSelectionBounds),
-        icon: '<span class="ag-icon ag-icon-plus"></span>',
-      },
-      'separator',
-      {
-        name: `Delete ${rowLabel}`,
-        action: () => deleteRows(cellSelectionBounds),
-        icon: '<span class="ag-icon ag-icon-minus"></span>',
-      },
-      // Include default menu items (copy, paste, export, etc.)
-      ...(params.defaultItems ?? []),
-    ];
-  } else {
-    // No selection - show only default menu items
-    return params?.defaultItems ?? [];
-  }
+  // Build context menu with row manipulation options
+  return [
+    {
+      name: `Insert ${rowLabel} Above`,
+      action: () => addRows(rowCount, startIndex),
+      icon: '<span class="ag-icon ag-icon-plus"></span>',
+    },
+    {
+      name: `Insert ${rowLabel} Below`,
+      action: () => addRows(rowCount, endIndex + 1),
+      icon: '<span class="ag-icon ag-icon-plus"></span>',
+    },
+    'separator',
+    {
+      name: `Delete ${rowLabel}`,
+      action: () => deleteRows(startIndex, endIndex),
+      icon: '<span class="ag-icon ag-icon-minus"></span>',
+    },
+    // Include default menu items (copy, paste, export, etc.)
+    ...(params.defaultItems ?? []),
+  ];
 };
 </script>
 
