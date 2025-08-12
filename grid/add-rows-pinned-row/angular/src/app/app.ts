@@ -84,7 +84,7 @@ export class App implements OnInit {
     // Default column properties applied to all columns
     this.defaultColDef = {
       flex: 1,
-      editable: true,
+      editable: (params) => params.node.rowPinned === 'top', // Only allow editing for pinned rows
       valueFormatter: this.valueFormatter.bind(this),
       cellClassRules: {
         // Apply CSS Class to Pinned Cells with User Edits

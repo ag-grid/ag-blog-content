@@ -154,10 +154,9 @@ const columnDefs: ColDef<AthleteData>[] = [
 ];
 
 // Default column properties applied to all columns
-// Default column properties applied to all columns
 const defaultColDef: ColDef = {
   flex: 1,
-  editable: true,
+  editable: (params) => params.node.rowPinned === 'top', // Only allow editing for pinned rows
   valueFormatter,
   cellClassRules: {
     // Apply CSS Class to Pinned Cells with User Edits
