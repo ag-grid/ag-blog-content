@@ -138,9 +138,8 @@ const columnDefs = [
 // Default column properties applied to all columns
 const defaultColDef = {
   flex: 1,
-  editable: true,
-  valueFormatter,
   cellClassRules,
+  editable: (params) => params.node.rowPinned === 'top', // Only allow editing for pinned rows
 };
 
 const gridOptions = {

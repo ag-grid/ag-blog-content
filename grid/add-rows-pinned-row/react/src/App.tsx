@@ -100,7 +100,7 @@ const App: React.FC = () => {
   // Default column properties applied to all columns
   const defaultColDef: ColDef = {
     flex: 1,
-    editable: true,
+    editable: (params) => params.node.rowPinned === 'top', // Only allow editing for pinned rows
     valueFormatter,
     cellClassRules,
   };
