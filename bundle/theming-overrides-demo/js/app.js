@@ -3,9 +3,20 @@ let currentTheme = {
   common: {
     title: {
       enabled: true,
+      text: 'Enterprise Revenue Growth',
+      color: '#333333',
+      fontWeight: 'bold',
     },
     subtitle: {
       enabled: true,
+      text: 'Accelerating growth trajectory',
+    },
+    padding: {
+      left: 0,
+      right: 0,
+    },
+    background: {
+      fill: '#f8f9fa',
     },
     legend: {
       enabled: true,
@@ -18,7 +29,7 @@ let currentTheme = {
         bottom: {
           title: {
             enabled: true,
-            text: '',
+            text: 'Quarters',
           },
           keys: ['quarter'],
         },
@@ -27,7 +38,7 @@ let currentTheme = {
         left: {
           title: {
             enabled: true,
-            text: '',
+            text: 'Revenue (Millions USD)',
           },
           label: {
             formatter: (params) => `$${params.value}M`,
@@ -37,7 +48,7 @@ let currentTheme = {
         right: {
           title: {
             enabled: true,
-            text: '',
+            text: 'Growth (%)',
           },
           keys: ['growth'],
         },
