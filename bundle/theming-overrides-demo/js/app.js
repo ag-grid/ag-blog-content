@@ -3,20 +3,9 @@ let currentTheme = {
   common: {
     title: {
       enabled: true,
-      text: 'Enterprise Revenue Growth',
-      color: '#333333',
-      fontWeight: 'bold',
     },
     subtitle: {
       enabled: true,
-      text: 'Accelerating growth trajectory',
-    },
-    padding: {
-      left: 70,
-      right: 70,
-    },
-    background: {
-      fill: '#f8f9fa',
     },
     legend: {
       enabled: true,
@@ -29,7 +18,7 @@ let currentTheme = {
         bottom: {
           title: {
             enabled: true,
-            text: 'Quarters',
+            text: '',
           },
           keys: ['quarter'],
         },
@@ -38,7 +27,7 @@ let currentTheme = {
         left: {
           title: {
             enabled: true,
-            text: 'Revenue (Millions USD)',
+            text: '',
           },
           label: {
             formatter: (params) => `$${params.value}M`,
@@ -48,7 +37,7 @@ let currentTheme = {
         right: {
           title: {
             enabled: true,
-            text: 'Growth (%)',
+            text: '',
           },
           keys: ['growth'],
         },
@@ -84,7 +73,7 @@ let currentTheme = {
   },
 };
 
-// Sample data
+// Sample data - matching React data exactly
 const rowData = [
   { quarter: 'Q1 2019', revenue: 2.4, growth: 12, customers: 1200 },
   { quarter: 'Q2 2019', revenue: 2.8, growth: 18, customers: 1350 },
@@ -115,6 +104,7 @@ const rowData = [
 // Grid and chart instances
 let gridApi;
 let standaloneChart;
+let integratedChart;
 
 // Column definitions
 const columnDefs = [
@@ -174,8 +164,16 @@ function updateTheme(path, value) {
 
 // Update integrated chart theme
 function updateIntegratedChart() {
+  console.log(
+    'Updating integrated chart with theme:',
+    integratedChart?.chartId
+  );
   if (gridApi) {
-    gridApi.updateChartThemeOverrides(currentTheme);
+    gridApi.updateChart({
+      type: 'rangeChartUpdate',
+      chartId: integratedChart?.chartId,
+      chartThemeOverrides: currentTheme,
+    });
   }
 }
 
@@ -196,7 +194,6 @@ function updateStandaloneChart() {
           type: 'line',
           xKey: 'quarter',
           yKey: 'growth',
-          yName: 'YoY Growth (%)',
         },
       ],
       axes: [
@@ -215,44 +212,23 @@ function updateStandaloneChart() {
       ],
     };
 
-    agCharts.AgCharts.update(standaloneChart, options);
+    standaloneChart.update(options);
   }
 }
 
 // Initialize form event listeners
 function initializeFormListeners() {
-  // Text & Colors
-  document.getElementById('titleText').addEventListener('input', (e) => {
-    updateTheme('common.title.text', e.target.value);
-  });
-
-  document.getElementById('titleColor').addEventListener('input', (e) => {
-    updateTheme('common.title.color', e.target.value);
-  });
-
-  document.getElementById('subtitleText').addEventListener('input', (e) => {
-    updateTheme('common.subtitle.text', e.target.value);
-  });
-
-  document.getElementById('backgroundColor').addEventListener('input', (e) => {
-    updateTheme('common.background.fill', e.target.value + 'ff');
-  });
-
   // Layout
-  document.getElementById('leftPadding').addEventListener('input', (e) => {
-    updateTheme('common.padding.left', parseInt(e.target.value));
-  });
-
-  document.getElementById('rightPadding').addEventListener('input', (e) => {
-    updateTheme('common.padding.right', parseInt(e.target.value));
-  });
-
   document.getElementById('xAxisTitle').addEventListener('input', (e) => {
     updateTheme('common.axes.category.bottom.title.text', e.target.value);
   });
 
-  document.getElementById('yAxisTitle').addEventListener('input', (e) => {
+  document.getElementById('yAxisTitleLeft').addEventListener('input', (e) => {
     updateTheme('common.axes.number.left.title.text', e.target.value);
+  });
+
+  document.getElementById('yAxisTitleRight').addEventListener('input', (e) => {
+    updateTheme('common.axes.number.right.title.text', e.target.value);
   });
 
   // Area Styling
@@ -319,7 +295,7 @@ function initializeGrid() {
       gridApi = params.api;
 
       // Create integrated chart
-      const rangeChart = params.api.createRangeChart({
+      integratedChart = params.api.createRangeChart({
         chartType: 'customCombo',
         cellRange: {
           columns: ['quarter', 'revenue', 'growth'],
@@ -330,8 +306,8 @@ function initializeGrid() {
         ],
       });
 
-      if (rangeChart) {
-        rangeChart.setMaximized(true);
+      if (integratedChart) {
+        integratedChart.setMaximized(true);
       }
     },
   };
@@ -357,7 +333,6 @@ function initializeStandaloneChart() {
         type: 'line',
         xKey: 'quarter',
         yKey: 'growth',
-        yName: 'YoY Growth (%)',
       },
     ],
     axes: [
