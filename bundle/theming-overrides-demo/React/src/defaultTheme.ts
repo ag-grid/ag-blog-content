@@ -51,6 +51,9 @@ export const defaultTheme: AgChartThemeOverrides = {
             enabled: true,
             text: 'Growth (%)',
           },
+          label: {
+            formatter: (params) => `${params.value}%`,
+          },
           keys: ['growth'],
         },
       },

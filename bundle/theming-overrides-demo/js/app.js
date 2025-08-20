@@ -50,6 +50,10 @@ let currentTheme = {
             enabled: true,
             text: 'Growth (%)',
           },
+          label: {
+            formatter: (params) => `${params.value}%`,
+          },
+          min: 0,
           keys: ['growth'],
         },
       },
@@ -205,6 +209,7 @@ function updateStandaloneChart() {
           type: 'line',
           xKey: 'quarter',
           yKey: 'growth',
+          yName: 'Growth (%)',
         },
       ],
       axes: [
@@ -344,6 +349,7 @@ function initializeStandaloneChart() {
         type: 'line',
         xKey: 'quarter',
         yKey: 'growth',
+        yName: 'Growth (%)',
       },
     ],
     axes: [
