@@ -1,0 +1,49 @@
+<html lang="en">
+  <head>
+    <title>JavaScript Example - High Performance Charts - Line Series</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <style media="only screen">
+            :root {
+        --button-background-color: #f8f9fa;
+        --button-text-color: #212529;
+        --button-color-border-primary: #d0d5dd;
+        --button-hover-background-color: #e2e6ea;
+        --button-active-background-color: #0d6efd;
+        --button-active-text-color: white;
+        --select-chevron: url('data:image/svg+xml;utf8,<svg fill="none" stroke="%23182230" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 9L12 15L18 9"/></svg>');
+
+        overflow: hidden;
+        font-family: -apple-system, "system-ui", "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+          "Noto Color Emoji";
+
+        background: white;
+        color: white;
+      }
+
+      :root,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: grid;
+        grid: "toolbar" auto "canvas" minmax(0, 1fr) / 1fr;
+        padding: 1rem;
+        gap: 9px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="myChart"></div>
+    <script src="https://cdn.jsdelivr.net/npm/ag-charts-enterprise@11.3.1/dist/umd/ag-charts-enterprise.js?t=1748412748925"></script>
+    <script src="./data.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>
