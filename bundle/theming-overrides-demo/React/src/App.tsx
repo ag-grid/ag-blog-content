@@ -100,7 +100,6 @@ function App() {
           type: 'line' as const,
           xKey: 'quarter',
           yKey: 'growth',
-          yName: 'YoY Growth (%)',
         },
       ],
       axes: [
