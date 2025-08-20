@@ -1,49 +1,5 @@
 const { AgCharts } = agCharts;
 
-function formatDateTooltip(date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  const day = date.getDate();
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-
-  // Add ordinal suffix
-  let dayWithSuffix;
-  if (day >= 11 && day <= 13) {
-    dayWithSuffix = day + 'th';
-  } else {
-    switch (day % 10) {
-      case 1:
-        dayWithSuffix = day + 'st';
-        break;
-      case 2:
-        dayWithSuffix = day + 'nd';
-        break;
-      case 3:
-        dayWithSuffix = day + 'rd';
-        break;
-      default:
-        dayWithSuffix = day + 'th';
-        break;
-    }
-  }
-
-  return `${dayWithSuffix} ${month} ${year}`;
-}
-
 async function initChart() {
   const { data, totalDownloads } = await getData();
 
@@ -51,26 +7,20 @@ async function initChart() {
     container: document.getElementById('myChart'),
     data: data,
     title: {
-      text: `AG Charts Community - Weekly Downloads (${totalDownloads.toLocaleString()} total)`,
+      text: [
+        { text: 'AG Charts Community Downloads' },
+        {
+          text: ` (${totalDownloads.toLocaleString()})`,
+          fontWeight: 'bold',
+        },
+      ],
+    },
+    subtitle: {
+      text: 'Data from NPM between 01/2020 to present',
     },
     height: 600,
     zoom: {
       enabled: true,
-      anchorPointX: 'pointer',
-      anchorPointY: 'pointer',
-      autoScaling: {
-        enabled: true,
-      },
-    },
-    initialState: {
-      zoom: {
-        rangeX: {
-          start: {
-            __type: 'date',
-            value: new Date('2023-01-01').toISOString(),
-          },
-        },
-      },
     },
     series: [
       {
@@ -90,8 +40,10 @@ async function initChart() {
         strokeWidth: 1,
         tooltip: {
           renderer: ({ datum }) => {
-            const weekStart = formatDateTooltip(new Date(datum.weekStart));
-            const weekEnd = formatDateTooltip(new Date(datum.weekEnd));
+            // Use the year and month directly from the data
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            const monthName = `${months[datum.month - 1]} ${datum.year}`;
 
             // Format growth percentages
             const formatGrowth = (growth) => {
@@ -105,16 +57,18 @@ async function initChart() {
               return growth >= 0 ? '#059669' : '#dc2626';
             };
 
-            const weekGrowthText = formatGrowth(datum.weekOverWeekGrowth);
-            const weekGrowthColor = formatGrowthColor(datum.weekOverWeekGrowth);
+            const monthGrowthText = formatGrowth(datum.monthOverMonthGrowth);
+            const monthGrowthColor = formatGrowthColor(
+              datum.monthOverMonthGrowth
+            );
             const yearGrowthText = formatGrowth(datum.yearOverYearGrowth);
             const yearGrowthColor = formatGrowthColor(datum.yearOverYearGrowth);
 
             return `
               <div style="padding: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #e1e5e9;">
                 <div style="margin-bottom: 8px;">
-                  <span style="font-size: 12px; color: #6b728090; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Week</span>
-                  <div style="font-size: 14px; color: #1f2937; font-weight: 500; margin-top: 2px;">${weekStart} - ${weekEnd}</div>
+                  <span style="font-size: 12px; color: #6b728090; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Month</span>
+                  <div style="font-size: 14px; color: #1f2937; font-weight: 500; margin-top: 2px;">${monthName}</div>
                 </div>
                 <div style="margin-bottom: 8px;">
                   <span style="font-size: 12px; color: #6b728090; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Downloads</span>
@@ -122,8 +76,8 @@ async function initChart() {
                 </div>
                 <div style="display: flex; gap: 16px;">
                   <div style="flex: 1;">
-                    <span style="font-size: 10px; color: #6b728090; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">vs Prev Week</span>
-                    <div style="font-size: 12px; color: ${weekGrowthColor}; font-weight: 500; margin-top: 2px;">${weekGrowthText}</div>
+                    <span style="font-size: 10px; color: #6b728090; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">vs Prev Month</span>
+                    <div style="font-size: 12px; color: ${monthGrowthColor}; font-weight: 500; margin-top: 2px;">${monthGrowthText}</div>
                   </div>
                   <div style="flex: 1;">
                     <span style="font-size: 10px; color: #6b728090; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">vs Prev Year</span>
@@ -140,79 +94,33 @@ async function initChart() {
       {
         type: 'number',
         position: 'left',
-        title: { text: 'Weekly Downloads' },
+        title: { text: 'Monthly Downloads' },
+        gridLine: {
+          enabled: true,
+        },
+        label: {
+          formatter: ({ value }) => {
+            if (value >= 1000000) {
+              return `${(value / 1000000).toFixed(1)}m`;
+            } else if (value >= 1000) {
+              return `${(value / 1000).toFixed(0)}k`;
+            }
+            return value.toString();
+          },
+        },
       },
       {
         type: 'time',
         position: 'bottom',
         nice: false,
-        crossLines: [
-          {
-            type: 'line',
-            value: new Date('2023-10-10').getTime(),
-            stroke: '#B4BBBF',
-            strokeWidth: 2,
-            strokeOpacity: 0.8,
-            lineDash: [4, 4],
-            label: {
-              text: 'AG Charts Enterprise',
-              position: 'inside-right',
-              rotation: 90,
-              color: '#666c70ff',
-              fontStyle: 'bold',
-            },
-          },
-          {
-            type: 'line',
-            value: new Date('2024-07-01').getTime(),
-            stroke: '#B4BBBF',
-            strokeWidth: 2,
-            strokeOpacity: 0.8,
-            lineDash: [4, 4],
-            label: {
-              text: 'AG Charts 10.0',
-              position: 'inside-right',
-              rotation: 90,
-              color: '#666c70ff',
-              fontStyle: 'bold',
-            },
-          },
-          {
-            type: 'line',
-            value: new Date('2024-12-11').getTime(),
-            stroke: '#B4BBBF',
-            strokeWidth: 2,
-            strokeOpacity: 0.8,
-            lineDash: [4, 4],
-            label: {
-              text: 'AG Charts 11.0',
-              position: 'inside-right',
-              rotation: 90,
-              color: '#666c70ff',
-              fontStyle: 'bold',
-            },
-          },
-          {
-            type: 'line',
-            value: new Date('2025-06-25').getTime(),
-            stroke: '#B4BBBF',
-            strokeWidth: 2,
-            strokeOpacity: 0.8,
-            lineDash: [4, 4],
-            label: {
-              text: 'AG Charts 12.0',
-              position: 'inside-right',
-              rotation: 90,
-              color: '#666c70ff',
-              fontStyle: 'bold',
-            },
-          },
-        ],
+        gridLine: {
+          enabled: true,
+        },
       },
     ],
   };
 
-  const chart = AgCharts.create(options);
+  AgCharts.create(options);
 }
 
 // Initialize the chart when the page loads

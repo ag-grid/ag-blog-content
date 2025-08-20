@@ -14,9 +14,10 @@ async function fetchNpmDownloads(packageName, startDate, endDate) {
   }
 }
 
-async function getWeeklyDownloads(packageName, startYear = 2019) {
+async function getMonthlyDownloads(packageName, startYear = 2020) {
+  // Set end date to the last day of the previous month
   const finalEndDate = new Date();
-  finalEndDate.setDate(finalEndDate.getDate()); // Exclude last 7 days
+  finalEndDate.setDate(0); // Sets to last day of previous month
 
   const allDownloads = [];
   let currentStart = new Date(`${startYear}-01-01`);
@@ -33,8 +34,6 @@ async function getWeeklyDownloads(packageName, startYear = 2019) {
 
     const startDateString = currentStart.toISOString().split('T')[0];
     const endDateString = chunkEnd.toISOString().split('T')[0];
-
-    console.log(`Fetching data from ${startDateString} to ${endDateString}`);
 
     const data = await fetchNpmDownloads(
       packageName,
@@ -53,55 +52,77 @@ async function getWeeklyDownloads(packageName, startYear = 2019) {
 
   if (allDownloads.length === 0) {
     console.error('No download data available');
-    return { weeklyData: [], totalDownloads: 0 };
+    return { monthlyData: [], totalDownloads: 0 };
   }
 
   // Sort downloads by date to ensure proper order
   allDownloads.sort((a, b) => new Date(a.day) - new Date(b.day));
 
-  // Group daily downloads into weekly buckets
-  const weeklyData = [];
+  // Group daily downloads into monthly buckets
+  const monthlyData = [];
   let totalDownloads = 0;
 
-  for (let i = 0; i < allDownloads.length; i += 7) {
-    const weekDownloads = allDownloads.slice(i, i + 7);
-    const weeklyTotal = weekDownloads.reduce(
-      (sum, day) => sum + day.downloads,
-      0
-    );
-    const weekStart = new Date(weekDownloads[0].day);
-    const weekEnd = new Date(weekDownloads[weekDownloads.length - 1].day);
+  // Group by month
+  const monthlyGroups = {};
 
-    totalDownloads += weeklyTotal;
+  for (const day of allDownloads) {
+    const date = new Date(day.day);
+    const monthKey = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, '0')}`;
 
-    weeklyData.push({
-      timestamp: weekStart.getTime(),
-      downloads: weeklyTotal,
-      weekStart: weekStart.toISOString().split('T')[0],
-      weekEnd: weekEnd.toISOString().split('T')[0],
+    if (!monthlyGroups[monthKey]) {
+      monthlyGroups[monthKey] = {
+        downloads: 0,
+        days: [],
+        year: date.getFullYear(),
+        month: date.getMonth(),
+      };
+    }
+
+    monthlyGroups[monthKey].downloads += day.downloads;
+    monthlyGroups[monthKey].days.push(day.day);
+    totalDownloads += day.downloads;
+  }
+
+  // Convert to array and sort
+  for (const [, data] of Object.entries(monthlyGroups)) {
+    const monthStart = new Date(data.year, data.month, 1);
+    const monthEnd = new Date(data.year, data.month + 1, 0);
+
+    monthlyData.push({
+      timestamp: monthStart.getTime(),
+      downloads: data.downloads,
+      monthStart: monthStart.toISOString().split('T')[0],
+      monthEnd: monthEnd.toISOString().split('T')[0],
+      year: data.year,
+      month: data.month + 1
     });
   }
 
-  return { weeklyData, totalDownloads };
+  // Sort by timestamp
+  monthlyData.sort((a, b) => a.timestamp - b.timestamp);
+
+  return { monthlyData, totalDownloads };
 }
 
 async function getData() {
   const packageName = 'ag-charts-community';
-  const { weeklyData, totalDownloads } = await getWeeklyDownloads(
+  const { monthlyData, totalDownloads } = await getMonthlyDownloads(
     packageName,
-    2019
+    2020
   );
 
-  const chartData = weeklyData.map((item, index) => {
-    // Calculate week-over-week growth (previous week)
-    const previousWeek = index > 0 ? weeklyData[index - 1] : null;
-    const weekOverWeekGrowth = previousWeek
-      ? ((item.downloads - previousWeek.downloads) / previousWeek.downloads) *
+  const chartData = monthlyData.map((item, index) => {
+    // Calculate month-over-month growth (previous month)
+    const previousMonth = index > 0 ? monthlyData[index - 1] : null;
+    const monthOverMonthGrowth = previousMonth
+      ? ((item.downloads - previousMonth.downloads) / previousMonth.downloads) *
         100
       : null;
 
-    // Calculate year-over-year growth (52 weeks ago, approximately 1 year)
-    const previousYear = index >= 52 ? weeklyData[index - 52] : null;
+    // Calculate year-over-year growth (12 months ago)
+    const previousYear = index >= 12 ? monthlyData[index - 12] : null;
     const yearOverYearGrowth = previousYear
       ? ((item.downloads - previousYear.downloads) / previousYear.downloads) *
         100
@@ -110,11 +131,13 @@ async function getData() {
     return {
       timestamp: item.timestamp,
       price: item.downloads, // Using 'price' to match the chart configuration
-      weekStart: item.weekStart,
-      weekEnd: item.weekEnd,
-      weekOverWeekGrowth: weekOverWeekGrowth,
+      monthStart: item.monthStart,
+      monthEnd: item.monthEnd,
+      year: item.year,
+      month: item.month,
+      monthOverMonthGrowth: monthOverMonthGrowth,
       yearOverYearGrowth: yearOverYearGrowth,
-      previousWeekDownloads: previousWeek ? previousWeek.downloads : null,
+      previousMonthDownloads: previousMonth ? previousMonth.downloads : null,
       previousYearDownloads: previousYear ? previousYear.downloads : null,
     };
   });
