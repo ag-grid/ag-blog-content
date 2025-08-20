@@ -3,24 +3,24 @@ import type { AgChartThemeOverrides } from 'ag-charts-enterprise';
 export const defaultTheme: AgChartThemeOverrides = {
   common: {
     title: {
-      enabled: true,
+      enabled: false,
       text: 'Enterprise Revenue Growth',
       color: '#333333',
       fontWeight: 'bold',
     },
     subtitle: {
-      enabled: true,
+      enabled: false,
       text: 'Accelerating growth trajectory',
     },
     padding: {
-      left: 70,
-      right: 70,
+      left: 0,
+      right: 0,
     },
     background: {
       fill: '#f8f9fa',
     },
     legend: {
-      enabled: true,
+      enabled: false,
     },
     axes: {
       category: {

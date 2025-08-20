@@ -23,99 +23,11 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
 
   return (
     <div className="theme-form">
-      <h2 className="theme-form-title">
-        Edit Shared Theme
-      </h2>
+      <h2 className="theme-form-title">Edit Shared Theme</h2>
 
       <div className="theme-form-grid">
         <div className="theme-section">
-          <h4 className="theme-section-header">Text & Colors</h4>
-          <div className="theme-input-grid-2">
-            <div className="theme-input-group">
-              <label className="theme-label">Title</label>
-              <input
-                type="text"
-                className="theme-input"
-                value={
-                  typeof theme.common?.title?.text === 'string'
-                    ? theme.common.title.text
-                    : ''
-                }
-                onChange={(e) =>
-                  updateTheme('common.title.text', e.target.value)
-                }
-              />
-            </div>
-            <div className="theme-input-group">
-              <label className="theme-label">Title Color</label>
-              <input
-                type="color"
-                className="theme-input"
-                value={theme.common?.title?.color || '#333333'}
-                onChange={(e) =>
-                  updateTheme('common.title.color', e.target.value)
-                }
-              />
-            </div>
-          </div>
-          <div className="theme-input-grid-2">
-            <div className="theme-input-group">
-              <label className="theme-label">Subtitle</label>
-              <input
-                type="text"
-                className="theme-input"
-                value={
-                  typeof theme.common?.subtitle?.text === 'string'
-                    ? theme.common.subtitle.text
-                    : ''
-                }
-                onChange={(e) =>
-                  updateTheme('common.subtitle.text', e.target.value)
-                }
-              />
-            </div>
-            <div className="theme-input-group">
-              <label className="theme-label">Background</label>
-              <input
-                type="color"
-                className="theme-input"
-                value={
-                  theme.common?.background?.fill?.replace('ff', '') || '#ececec'
-                }
-                onChange={(e) =>
-                  updateTheme('common.background.fill', e.target.value + 'ff')
-                }
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="theme-section">
           <h4 className="theme-section-header">Layout</h4>
-          <div className="theme-input-grid-2">
-            <div className="theme-input-group">
-              <label className="theme-label">Left Padding</label>
-              <input
-                type="number"
-                className="theme-input"
-                value={theme.common?.padding?.left || 70}
-                onChange={(e) =>
-                  updateTheme('common.padding.left', parseInt(e.target.value))
-                }
-              />
-            </div>
-            <div className="theme-input-group">
-              <label className="theme-label">Right Padding</label>
-              <input
-                type="number"
-                className="theme-input"
-                value={theme.common?.padding?.right || 70}
-                onChange={(e) =>
-                  updateTheme('common.padding.right', parseInt(e.target.value))
-                }
-              />
-            </div>
-          </div>
           <div className="theme-input-grid-2">
             <div className="theme-input-group">
               <label className="theme-label">X-Axis Title</label>
@@ -132,7 +44,7 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
               />
             </div>
             <div className="theme-input-group">
-              <label className="theme-label">Y-Axis Title</label>
+              <label className="theme-label">Y-Axis Title (Left)</label>
               <input
                 type="text"
                 className="theme-input"
@@ -146,13 +58,30 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
               />
             </div>
           </div>
+          <div className="theme-input-grid-2">
+            <div className="theme-input-group">
+              <label className="theme-label">Y-Axis Title (Right)</label>
+              <input
+                type="text"
+                className="theme-input"
+                value={theme.common?.axes?.number?.right?.title?.text || ''}
+                onChange={(e) =>
+                  updateTheme(
+                    'common.axes.number.right.title.text',
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+            <div className="theme-input-group"></div>
+          </div>
         </div>
 
         <div className="theme-section">
           <h4 className="theme-section-header">Area Styling</h4>
-          <div className="theme-input-grid-3">
-            <div className="theme-input-group">
-              <label className="theme-label">Start</label>
+          <div className="theme-colors-row">
+            <span className="theme-label">Gradient:</span>
+            <div className="theme-color-item">
               <input
                 type="color"
                 className="theme-input"
@@ -167,9 +96,9 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
                   )
                 }
               />
+              <label className="theme-label">Start</label>
             </div>
-            <div className="theme-input-group">
-              <label className="theme-label">Mid</label>
+            <div className="theme-color-item">
               <input
                 type="color"
                 className="theme-input"
@@ -184,9 +113,9 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
                   )
                 }
               />
+              <label className="theme-label">Mid</label>
             </div>
-            <div className="theme-input-group">
-              <label className="theme-label">End</label>
+            <div className="theme-color-item">
               <input
                 type="color"
                 className="theme-input"
@@ -201,6 +130,7 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
                   )
                 }
               />
+              <label className="theme-label">End</label>
             </div>
           </div>
           <div className="theme-input-grid-2">
@@ -238,9 +168,9 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
 
         <div className="theme-section">
           <h4 className="theme-section-header">Line Styling</h4>
-          <div className="theme-input-grid-2">
-            <div className="theme-input-group">
-              <label className="theme-label">Stroke Color</label>
+          <div className="theme-colors-row">
+            <div className="theme-color-group">
+              <label className="theme-label">Stroke</label>
               <input
                 type="color"
                 className="theme-input"
@@ -250,8 +180,15 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
                 }
               />
             </div>
-            <div className="theme-input-group">
-              <label className="theme-label">Line Markers</label>
+            <div
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <label className="theme-label">Markers</label>
               <input
                 type="checkbox"
                 checked={theme.line?.series?.marker?.enabled || false}
@@ -262,28 +199,45 @@ export function ThemeForm({ theme, onThemeChange }: ThemeFormProps) {
               />
             </div>
           </div>
-          <div className="theme-input-grid-2">
-            <div className="theme-input-group">
-              <label className="theme-label">Dash Length</label>
-              <input
-                type="number"
-                className="theme-input"
-                value={(theme.line?.series?.lineDash as any)?.[0] || 5}
-                onChange={(e) =>
-                  updateTheme('line.series.lineDash.0', parseInt(e.target.value))
-                }
-              />
-            </div>
-            <div className="theme-input-group">
-              <label className="theme-label">Gap Length</label>
-              <input
-                type="number"
-                className="theme-input"
-                value={(theme.line?.series?.lineDash as any)?.[1] || 5}
-                onChange={(e) =>
-                  updateTheme('line.series.lineDash.1', parseInt(e.target.value))
-                }
-              />
+          <div className="theme-colors-row">
+            <label className="theme-label" style={{ minWidth: '60px' }}>
+              Line Dash:
+            </label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <label className="theme-label">Dash</label>
+                <input
+                  type="number"
+                  className="theme-input"
+                  style={{ width: '50px' }}
+                  value={(theme.line?.series?.lineDash as any)?.[0] || 5}
+                  onChange={(e) =>
+                    updateTheme(
+                      'line.series.lineDash.0',
+                      parseInt(e.target.value)
+                    )
+                  }
+                />
+              </div>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <label className="theme-label">Gap</label>
+                <input
+                  type="number"
+                  className="theme-input"
+                  style={{ width: '50px' }}
+                  value={(theme.line?.series?.lineDash as any)?.[1] || 5}
+                  onChange={(e) =>
+                    updateTheme(
+                      'line.series.lineDash.1',
+                      parseInt(e.target.value)
+                    )
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>

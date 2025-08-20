@@ -138,31 +138,30 @@ function App() {
 
   return (
     <div className="app-container">
-      <ThemeForm theme={theme} onThemeChange={setTheme} />
-
-      <div className="charts-container">
-        <div className="chart-card">
-          <h2 className="chart-card-title">
-            Integrated Charts (<code>ag-grid-enterprise</code> &{' '}
-            <code>ag-charts-enterprise</code>)
-          </h2>
-          <div className="chart-card-content">
-            <AgGridReact
-              rowData={rowData}
-              columnDefs={columnDefs}
-              defaultColDef={defaultColDef}
-              onGridReady={onGridReady}
-              chartThemeOverrides={theme}
-            />
-          </div>
+      <div className="main-layout">
+        <div className="theme-sidebar">
+          <ThemeForm theme={theme} onThemeChange={setTheme} />
         </div>
 
-        <div className="chart-card">
-          <h2 className="chart-card-title">
-            Standalone Charts (<code>ag-charts-enterprise</code>)
-          </h2>
-          <div className="chart-card-content">
-            <AgCharts options={chartOptions} />
+        <div className="content-area">
+          <div className="chart-card">
+            <h2 className="chart-card-title">Integrated Charts</h2>
+            <div className="chart-card-content">
+              <AgGridReact
+                rowData={rowData}
+                columnDefs={columnDefs}
+                defaultColDef={defaultColDef}
+                onGridReady={onGridReady}
+                chartThemeOverrides={theme}
+              />
+            </div>
+          </div>
+
+          <div className="chart-card">
+            <h2 className="chart-card-title">Standalone Charts</h2>
+            <div className="chart-card-content">
+              <AgCharts options={chartOptions} />
+            </div>
           </div>
         </div>
       </div>
