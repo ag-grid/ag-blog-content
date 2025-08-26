@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AG Grid & AG Charts Theme Overrides Demo</title>
+    <title>AG Grid & AG Charts - Unified Theming API Demo</title>
 
     
     <!-- AG Charts Community JS -->
@@ -23,105 +23,97 @@
         <div class="main-layout">
             <div class="theme-sidebar">
                 <!-- Theme Form -->
-                <div class="theme-form">
-                    <h2 class="theme-form-title">Edit Shared Theme</h2>
+                <div class="theme-form" id="themeForm">
+                    <div class="theme-form-header">
+                        <div class="theme-form-title">Theme Controls</div>
+                    </div>
                     
                     <div class="theme-form-grid">
                         <!-- Layout Section -->
                         <div class="theme-section">
                             <h4 class="theme-section-header">Layout</h4>
-                            <div class="theme-input-grid-2">
-                                <div class="theme-input-group">
-                                    <label class="theme-label">X-Axis Title</label>
-                                    <input type="text" class="theme-input" id="xAxisTitle" value="">
-                                </div>
-                                <div class="theme-input-group">
-                                    <label class="theme-label">Y-Axis Title (Left)</label>
-                                    <input type="text" class="theme-input" id="yAxisTitleLeft" value="">
-                                </div>
+                            <div class="form-field">
+                                <label class="field-label">Y-Axis Left</label>
+                                <input type="text" class="field-input" id="yAxisTitleLeft" value="Revenue (Millions USD)">
                             </div>
-                            <div class="theme-input-grid-2">
-                                <div class="theme-input-group">
-                                    <label class="theme-label">Y-Axis Title (Right)</label>
-                                    <input type="text" class="theme-input" id="yAxisTitleRight" value="">
-                                </div>
-                                <div class="theme-input-group"></div>
+                            <div class="form-field">
+                                <label class="field-label">Y-Axis Right</label>
+                                <input type="text" class="field-input" id="yAxisTitleRight" value="Enterprise Customers">
                             </div>
                         </div>
                         
-                        <!-- Area Styling Section -->
+                        <!-- Bar Section -->
                         <div class="theme-section">
-                            <h4 class="theme-section-header">Area Styling</h4>
-                            <div class="theme-colors-row">
-                                <span class="theme-label">Gradient:</span>
-                                <div class="theme-color-item">
-                                    <input type="color" class="theme-input" id="areaColorStart" value="#f0f8ff">
-                                    <label class="theme-label">Start</label>
+                            <h4 class="theme-section-header">Bar Chart</h4>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label class="field-label">Gradient</label>
+                                    <div class="color-group">
+                                        <div class="color-field">
+                                            <input type="color" class="color-input" id="barColorStart" value="#00B0F0">
+                                            <span class="color-label">Start</span>
+                                        </div>
+                                        <div class="color-field">
+                                            <input type="color" class="color-input" id="barColorEnd" value="#0073CC">
+                                            <span class="color-label">End</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="theme-color-item">
-                                    <input type="color" class="theme-input" id="areaColorMid" value="#b0e0e6">
-                                    <label class="theme-label">Mid</label>
-                                </div>
-                                <div class="theme-color-item">
-                                    <input type="color" class="theme-input" id="areaColorEnd" value="#add8e6">
-                                    <label class="theme-label">End</label>
-                                </div>
-                            </div>
-                            <div class="theme-input-grid-2">
-                                <div class="theme-input-group">
-                                    <label class="theme-label">Rotation: <span id="rotationValue">0</span>°</label>
-                                    <input type="range" min="0" max="360" class="theme-range-input" id="areaRotation" value="0">
-                                </div>
-                                <div class="theme-input-group">
-                                    <label class="theme-label">Area Markers</label>
-                                    <input type="checkbox" class="theme-checkbox" id="areaMarkers" checked>
+                                <div class="form-field">
+                                    <label class="field-label">Stroke</label>
+                                    <input type="color" class="color-input" id="barStrokeColor" value="#0073CC">
                                 </div>
                             </div>
+                            <div class="form-field">
+                                <label class="field-label">Rotation: <span id="rotationValue" class="value-display">90</span>°</label>
+                                <input type="range" min="0" max="360" class="range-input" id="barRotation" value="90">
+                            </div>
+                                <div class="form-field">
+                                    <label class="field-label">Width: <span id="strokeWidthValue" class="value-display">1</span>px</label>
+                                    <input type="range" min="0" max="5" class="range-input" id="barStrokeWidth" value="1">
+                                </div>
                         </div>
                         
-                        <!-- Line Styling Section -->
+                        <!-- Line Section -->
                         <div class="theme-section">
-                            <h4 class="theme-section-header">Line Styling</h4>
-                            <div class="theme-colors-row">
-                                <div class="theme-color-group">
-                                    <label class="theme-label">Stroke</label>
-                                    <input type="color" class="theme-input" id="lineStrokeColor" value="#788990">
+                            <h4 class="theme-section-header">Line Chart</h4>
+                            <div class="form-row">
+                            <div class="form-field">
+                                <label class="field-label">Stroke</label>
+                                <input type="color" class="color-input" id="lineStrokeColor" value="#f3931e">
+                            </div>
+                                <div class="form-field">
+                                    <label class="field-label">Dash</label>
+                                    <input type="number" class="field-input" id="dashLength" value="5">
                                 </div>
-                                <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                                    <label class="theme-label">Markers</label>
-                                    <input type="checkbox" class="theme-checkbox" id="lineMarkers">
+                                <div class="form-field">
+                                    <label class="field-label">Gap</label>
+                                    <input type="number" class="field-input" id="gapLength" value="5">
                                 </div>
                             </div>
-                            <div class="theme-colors-row">
-                                <label class="theme-label" style="min-width: 60px;">Line Dash:</label>
-                                <div style="display: flex; gap: 8px; align-items: center;">
-                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                        <label class="theme-label">Dash</label>
-                                        <input type="number" class="theme-input" style="width: 50px;" id="dashLength" value="5">
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                        <label class="theme-label">Gap</label>
-                                        <input type="number" class="theme-input" style="width: 50px;" id="gapLength" value="5">
-                                    </div>
-                                </div>
+                            <div class="form-field">
+                                <label class="checkbox-field">
+                                    <input type="checkbox" class="checkbox-input" id="lineMarkers">
+                                    <span class="checkbox-label">Show Markers</span>
+                                </label>
                             </div>
                         </div>
                         
                         <!-- Visibility Section -->
                         <div class="theme-section">
                             <h4 class="theme-section-header">Visibility</h4>
-                            <div class="theme-visibility-container">
-                                <label class="theme-checkbox-label">
-                                    <input type="checkbox" class="theme-visibility-checkbox" id="showTitle" checked>
-                                    Show Title
+                            <div class="checkbox-group">
+                                <label class="checkbox-field">
+                                    <input type="checkbox" class="checkbox-input" id="showTitle">
+                                    <span class="checkbox-label">Show Title</span>
                                 </label>
-                                <label class="theme-checkbox-label">
-                                    <input type="checkbox" class="theme-visibility-checkbox" id="showSubtitle" checked>
-                                    Show Subtitle
+                                <label class="checkbox-field">
+                                    <input type="checkbox" class="checkbox-input" id="showSubtitle">
+                                    <span class="checkbox-label">Show Subtitle</span>
                                 </label>
-                                <label class="theme-checkbox-label">
-                                    <input type="checkbox" class="theme-visibility-checkbox" id="showLegend" checked>
-                                    Show Legend
+                                <label class="checkbox-field">
+                                    <input type="checkbox" class="checkbox-input" id="showLegend">
+                                    <span class="checkbox-label">Show Legend</span>
                                 </label>
                             </div>
                         </div>
@@ -132,16 +124,24 @@
             <!-- Content Area -->
             <div class="content-area">
                 <!-- Integrated Charts Card -->
-                <div class="chart-card">
-                    <h2 class="chart-card-title">Integrated Charts (Resize to View Grid)</h2>
+                <div class="chart-card integrated-chart" data-implementation="integrated">
+                    <div class="chart-card-header">
+                        <div class="implementation-badge integrated-badge">
+                            Integrated Charts
+                        </div>
+                    </div>
                     <div class="chart-card-content">
                         <div id="myGrid" style="height: 100%; width: 100%;"></div>
                     </div>
                 </div>
                 
                 <!-- Standalone Charts Card -->
-                <div class="chart-card">
-                    <h2 class="chart-card-title">Standalone Charts</h2>
+                <div class="chart-card standalone-chart" data-implementation="standalone">
+                    <div class="chart-card-header">
+                        <div class="implementation-badge standalone-badge">
+                            Standalone Charts
+                        </div>
+                    </div>
                     <div class="chart-card-content">
                         <div id="myChart" style="height: 100%; width: 100%;"></div>
                     </div>
@@ -150,6 +150,7 @@
         </div>
     </div>
     <!-- Application JS -->
+    <script src="utils.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
