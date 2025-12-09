@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>On Data Change Showcase</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="example-wrapper">
+    <div class="controls-row">
+        <button id="toggleBtn" onclick="toggleUpdates()">Start</button>
+        <button onclick="resetData()">Reset</button>
+        <select id="strategy" onchange="setStrategy(event.target.value)">
+            <option value="preserveDomain" selected>Preserve Domain</option>
+            <option value="preserveRatios">Preserve Ratios</option>
+            <option value="reset">Reset</option>
+        </select>
+        <label>
+            <input type="checkbox" onchange="setStickToEnd(event.target.checked)" />
+            Stick to End
+        </label>
+    </div>
+    <div id="myChart"></div>
+  </div>
+
+  <!-- AG Charts UMD bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/ag-charts-enterprise/dist/umd/ag-charts-enterprise.js"></script>
+
+  <!-- your app logic -->
+  <script src="./data.js"></script>
+  <script src="./main.js"></script>
+</body>
+</html>
