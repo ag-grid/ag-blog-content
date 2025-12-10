@@ -23,14 +23,13 @@ function seedRandom(seed = 1337) {
 const random = seedRandom(12345);
 
 function getData() {
-    const startDate = new Date('2024-01-01');
+    const startTimestamp = Date.UTC(2024, 0, 1);
+    const DAY_MS = 24 * 60 * 60 * 1000;
     const data = [];
 
     for (let i = 0; i < 50; i++) {
-        const date = new Date(startDate);
-        date.setDate(startDate.getDate() + i);
         data.push({
-            date,
+            date: startTimestamp + i * DAY_MS,
             price: 100 + Math.sin(i / 5) * 20 + random() * 10,
         });
     }
@@ -39,12 +38,11 @@ function getData() {
 }
 
 function getNextDataPoint(currentData) {
+    const DAY_MS = 24 * 60 * 60 * 1000;
     const lastPoint = currentData[currentData.length - 1];
-    const nextDate = new Date(lastPoint.date);
-    nextDate.setDate(nextDate.getDate() + 1);
 
     return {
-        date: nextDate,
+        date: lastPoint.date + DAY_MS,
         price: lastPoint.price + (random() - 0.5) * 10,
     };
 }
