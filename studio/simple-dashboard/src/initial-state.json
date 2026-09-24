@@ -1,0 +1,391 @@
+{
+    "pages": [
+        {
+            "id": "page-1",
+            "widgetLayout": {
+                "30": {
+                    "xTrack": 0,
+                    "yTrack": 6,
+                    "xSpan": 6,
+                    "ySpan": 6
+                },
+                "38": {
+                    "xTrack": 6,
+                    "yTrack": 6,
+                    "xSpan": 6,
+                    "ySpan": 6
+                },
+                "53": {
+                    "xTrack": 0,
+                    "yTrack": 12,
+                    "xSpan": 6,
+                    "ySpan": 25
+                },
+                "58": {
+                    "xTrack": 6,
+                    "yTrack": 12,
+                    "xSpan": 18,
+                    "ySpan": 25
+                },
+                "59": {
+                    "xTrack": 0,
+                    "yTrack": 0,
+                    "xSpan": 24,
+                    "ySpan": 6
+                },
+                "62": {
+                    "xTrack": 0,
+                    "yTrack": 37,
+                    "xSpan": 12,
+                    "ySpan": 25
+                },
+                "65": {
+                    "xTrack": 12,
+                    "yTrack": 37,
+                    "xSpan": 12,
+                    "ySpan": 25
+                },
+                "66": {
+                    "xTrack": 12,
+                    "yTrack": 6,
+                    "xSpan": 6,
+                    "ySpan": 6
+                },
+                "67": {
+                    "xTrack": 18,
+                    "yTrack": 6,
+                    "xSpan": 6,
+                    "ySpan": 6
+                }
+            },
+            "widgets": {
+                "30": {
+                    "type": "value",
+                    "dataMapping": {
+                        "value": [
+                            {
+                                "id": "purchase-orders.poId",
+                                "aggregation": "count"
+                            }
+                        ],
+                        "sparklineX": []
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Total purchase orders"
+                        }
+                    }
+                },
+                "38": {
+                    "type": "value",
+                    "dataMapping": {
+                        "value": [
+                            {
+                                "id": "expression-1::number",
+                                "aggregation": "sum"
+                            }
+                        ],
+                        "sparklineX": []
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Total spend"
+                        }
+                    }
+                },
+                "53": {
+                    "type": "donut-chart",
+                    "dataMapping": {
+                        "categoryKey": [
+                            {
+                                "id": "suppliers.name"
+                            }
+                        ],
+                        "valueKey": [
+                            {
+                                "id": "purchase-orders.poId",
+                                "aggregation": "count"
+                            }
+                        ],
+                        "tooltipKey": []
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Supplier breakdown"
+                        },
+                        "style": {
+                            "custom": {
+                                "pieDataLabel": {
+                                    "enabled": true,
+                                    "fontFamily": "\"Source Sans 3\", sans-serif",
+                                    "fontSize": 12,
+                                    "fontWeight": "normal",
+                                    "fontStyle": "normal"
+                                }
+                            }
+                        }
+                    }
+                },
+                "58": {
+                    "type": "column-chart-stacked",
+                    "dataMapping": {
+                        "categoryKey": [
+                            {
+                                "id": "purchase-orders.orderDate::month"
+                            }
+                        ],
+                        "valueKey": [
+                            {
+                                "id": "expression-1::number",
+                                "aggregation": "sum"
+                            }
+                        ],
+                        "tooltipKey": [],
+                        "legendKey": [
+                            {
+                                "id": "materials.subcategory"
+                            }
+                        ]
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Purchase trend by material"
+                        },
+                        "style": {
+                            "theme": {
+                                "common": {
+                                    "legend": {
+                                        "enabled": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "59": {
+                    "type": "button-filter",
+                    "dataMapping": {
+                        "value": [
+                            {
+                                "id": "materials.category"
+                            }
+                        ]
+                    },
+                    "format": {
+                        "style": {
+                            "selection": {
+                                "type": "single"
+                            }
+                        }
+                    }
+                },
+                "62": {
+                    "type": "treemap-chart",
+                    "dataMapping": {
+                        "categoryKey": [
+                            {
+                                "id": "materials.subcategory"
+                            },
+                            {
+                                "id": "materials.name"
+                            }
+                        ],
+                        "valueKey": [
+                            {
+                                "id": "expression-1::number",
+                                "aggregation": "sum"
+                            }
+                        ],
+                        "tooltipKey": []
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Spend breakdown by material"
+                        }
+                    }
+                },
+                "65": {
+                    "type": "pivot-grid",
+                    "dataMapping": {
+                        "rows": [
+                            {
+                                "id": "materials.name"
+                            },
+                            {
+                                "id": "suppliers.name"
+                            }
+                        ],
+                        "values": [
+                            {
+                                "id": "purchase-orders.quantity",
+                                "aggregation": "sum"
+                            },
+                            {
+                                "id": "expression-1::number",
+                                "aggregation": "sum"
+                            },
+                            {
+                                "id": "purchase-orders.unitCost",
+                                "aggregation": "avg"
+                            }
+                        ],
+                        "columns": []
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Unit cost by supplier"
+                        }
+                    }
+                },
+                "66": {
+                    "type": "value",
+                    "dataMapping": {
+                        "value": [
+                            {
+                                "id": "expression-5::number"
+                            }
+                        ],
+                        "sparklineX": []
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Units accepted"
+                        }
+                    }
+                },
+                "67": {
+                    "type": "value",
+                    "dataMapping": {
+                        "value": [
+                            {
+                                "id": "expression-4::number"
+                            }
+                        ],
+                        "sparklineX": []
+                    },
+                    "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "On-time delivery"
+                        }
+                    }
+                }
+            },
+            "selection": {
+                "type": "widget",
+                "id": "59"
+            },
+            "filter": {
+                "page": [
+                    {
+                        "field": {
+                            "id": "materials.category"
+                        },
+                        "view": {},
+                        "model": {
+                            "operator": "isIn",
+                            "value": [
+                                "Steel & Metals"
+                            ]
+                        },
+                        "filterWidgetId": "59"
+                    }
+                ],
+                "widget": {
+                    "30": [],
+                    "38": [],
+                    "45": [],
+                    "46": [],
+                    "53": [],
+                    "58": [],
+                    "59": [],
+                    "62": [],
+                    "65": []
+                }
+            }
+        }
+    ],
+    "selectedPageId": "page-1",
+    "version": "3.0.0",
+    "schema": {
+        "expressions": [
+            {
+                "isMeasure": false,
+                "id": "expression-1",
+                "tableId": "purchase-orders",
+                "format": "currencyFormat"
+            },
+            {
+                "isMeasure": false,
+                "id": "expression-2",
+                "tableId": "purchase-orders",
+                "format": "booleanFormat"
+            },
+            {
+                "isMeasure": false,
+                "id": "expression-3",
+                "tableId": "purchase-orders",
+                "format": "integerFormat"
+            },
+            {
+                "isMeasure": true,
+                "id": "expression-4",
+                "tableId": "purchase-orders",
+                "format": "percentageFormat"
+            },
+            {
+                "isMeasure": true,
+                "id": "expression-5",
+                "tableId": "purchase-orders",
+                "format": "percentageFormat"
+            }
+        ],
+        "fields": {
+            "expression-1": {
+                "name": "Total spend amount",
+                "expression": "MULTIPLY([purchase-orders.quantity], [purchase-orders.unitCost])",
+                "format": "$#,##0.00,,\\M"
+            },
+            "expression-2": {
+                "name": "On time",
+                "expression": "LESSTHANOREQUAL([schema-state-expression-55], 0)",
+                "format": "@"
+            },
+            "expression-3": {
+                "name": "Days late",
+                "expression": "DATEDIFF(\"day\", [purchase-orders.expectedDate], [purchase-orders.actualDate])",
+                "format": "#,##0"
+            },
+            "expression-4": {
+                "name": "% On-time delivery",
+                "expression": "DIVIDE(COUNT([schema-state-expression-54]), COUNT([purchase-orders.poId]))",
+                "format": "#,##0%"
+            },
+            "expression-5": {
+                "name": "% units accepted",
+                "expression": "DIVIDE(SUM([purchase-orders.acceptedQuantity]),SUM([purchase-orders.quantity]))",
+                "format": "#,##0.00%"
+            },
+            "suppliers.name": {
+                "name": "Supplier name",
+                "format": "@"
+            },
+            "materials.name": {
+                "name": "Material name",
+                "format": "@"
+            }
+        }
+    },
+    "panels": {
+        "edit": {
+            "width": 438.65234375
+        }
+    }
+}
