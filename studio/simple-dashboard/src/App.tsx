@@ -1,7 +1,13 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { AgStudio } from 'ag-studio-react';
-import type { AgReportState, AgStudioMode, AgStudioStateUpdatedEvent } from 'ag-studio';
+import type {
+    AgReportState,
+    AgStudioApi,
+    AgStudioApiReadyEvent,
+    AgStudioMode,
+    AgStudioStateUpdatedEvent,
+} from 'ag-studio';
 import { enableStudioDevValidations } from "ag-studio";
 import { theme } from './theme.ts';
 
@@ -24,7 +30,13 @@ import { clearWorkspace, loadWorkspace, saveWorkspace } from './storage';
 
 type Tab = { id: string; label: string };
 
-const DEFAULT_TAB_ID = 'orders';
+// The JSON import widens literal types (e.g. widget `type`), so assert it back
+// to the state shape Studio expects.
+const defaultReportState = initialStateJSON as unknown as AgReportState;
+
+// Each tab is a page in the Studio state, so the default tab's id is the id
+// of the page in the bundled report.
+const DEFAULT_TAB_ID = defaultReportState.selectedPageId;
 const DEFAULT_TABS: Tab[] = [{ id: DEFAULT_TAB_ID, label: 'Purchase Orders' }];
 
 const tabButtonStyle = (selected: boolean): CSSProperties => ({
@@ -52,82 +64,80 @@ const addTabButtonStyle: CSSProperties = {
     cursor: 'pointer',
 };
 
-// The JSON import widens literal types (e.g. widget `type`), so assert it back
-// to the state shape Studio expects.
-const defaultReportState = initialStateJSON as unknown as AgReportState;
-
 export default function App() {
-    // Read once, on mount: the saved tabs and their states replace the
-    // defaults when the user has saved before.
+    // Read once, on mount: the saved tabs and state replace the defaults when
+    // the user has saved before.
     const [saved] = useState(loadWorkspace);
+    const initialState = saved?.state ?? defaultReportState;
 
     const [tabs, setTabs] = useState<Tab[]>(() => saved?.tabs ?? DEFAULT_TABS);
-    const [tab, setTab] = useState<string>(() => (saved?.tabs ?? DEFAULT_TABS)[0].id);
+    // Mirrors `selectedPageId` in the Studio state, which is the source of truth.
+    const [tab, setTab] = useState<string>(initialState.selectedPageId);
     const [mode, setMode] = useState<AgStudioMode>('edit');
     const [dirty, setDirty] = useState(false);
-    // Bumped on reset so the mounted instance remounts even when the active
-    // tab id has not changed.
-    const [generation, setGeneration] = useState(0);
 
-    // Latest state per tab, kept in a ref because only the active tab is
-    // mounted — this is what lets a tab come back as the user left it, and
-    // it is what gets written to localStorage on save.
-    const statesRef = useRef<Record<string, AgReportState>>(saved?.states ?? {});
+    // A single Studio instance holds every tab as a page of one report, so
+    // switching or adding tabs goes through its API rather than remounting.
+    const apiRef = useRef<AgStudioApi | null>(null);
+    const stateRef = useRef<AgReportState>(initialState);
     const nextTabNumber = useRef((saved?.tabs ?? DEFAULT_TABS).length);
 
     const activeTab = useMemo(() => tabs.find(({ id }) => id === tab) ?? tabs[0], [tabs, tab]);
-
-    // `onStateUpdated` fires from the mounted instance, so it needs the tab id
-    // that was current at the time rather than the one captured at creation.
-    const activeTabIdRef = useRef(activeTab.id);
-    useEffect(() => {
-        activeTabIdRef.current = activeTab.id;
-    }, [activeTab.id]);
 
     const toggleMode = useCallback(() => {
         setMode((prev) => (prev === 'edit' ? 'view' : 'edit'));
     }, []);
 
+    const selectTab = useCallback((id: string) => {
+        const api = apiRef.current;
+        if (!api) return;
+        api.setState({ ...api.getState(), selectedPageId: id });
+        setTab(id);
+    }, []);
+
     const addTab = useCallback(() => {
+        const api = apiRef.current;
+        if (!api) return;
+
         const n = ++nextTabNumber.current;
-        const newTab: Tab = { id: `report-${n}`, label: `Report ${n}` };
+        const newTab: Tab = { id: `page-${n}`, label: `Report ${n}` };
+        const state = api.getState();
+        // State must be updated immutably: Studio diffs by reference.
+        api.setState({
+            ...state,
+            pages: [...state.pages, { id: newTab.id }],
+            selectedPageId: newTab.id,
+        });
         setTabs((prev) => [...prev, newTab]);
         setTab(newTab.id);
         setDirty(true);
     }, []);
 
+    const onApiReady = useCallback((event: AgStudioApiReadyEvent) => {
+        apiRef.current = event.api;
+    }, []);
+
     const onStateUpdated = useCallback((event: AgStudioStateUpdatedEvent) => {
-        statesRef.current[activeTabIdRef.current] = event.state;
+        stateRef.current = event.state;
+        setTab(event.state.selectedPageId);
         setDirty(true);
+        console.log(event.state);
     }, []);
 
     const save = useCallback(() => {
-        // Drop states belonging to tabs that no longer exist.
-        const states: Record<string, AgReportState> = {};
-        for (const { id } of tabs) {
-            const state = statesRef.current[id];
-            if (state) states[id] = state;
-        }
-        statesRef.current = states;
-
-        if (saveWorkspace({ tabs, states })) setDirty(false);
+        if (saveWorkspace({ tabs, state: stateRef.current })) setDirty(false);
     }, [tabs]);
 
     const reset = useCallback(() => {
         clearWorkspace();
-        statesRef.current = {};
+        apiRef.current?.setState(defaultReportState);
+        apiRef.current?.clearHistory();
+        stateRef.current = defaultReportState;
         nextTabNumber.current = DEFAULT_TABS.length;
         setTabs(DEFAULT_TABS);
         setTab(DEFAULT_TAB_ID);
-        setGeneration((prev) => prev + 1);
         setDirty(false);
     }, []);
-
-    // A saved state always wins; otherwise the first tab opens the bundled
-    // report and tabs added with "+" open empty.
-    const initialState =
-        statesRef.current[activeTab.id] ??
-        (activeTab.id === DEFAULT_TAB_ID ? defaultReportState : undefined);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -145,7 +155,7 @@ export default function App() {
                         key={id}
                         role="tab"
                         aria-selected={activeTab.id === id}
-                        onClick={() => setTab(id)}
+                        onClick={() => selectTab(id)}
                         style={tabButtonStyle(activeTab.id === id)}
                     >
                         {label}
@@ -181,17 +191,14 @@ export default function App() {
             {/* minHeight: 0 lets this flex child shrink so Studio sizes to the
                 remaining space rather than overflowing the viewport. */}
             <div style={{ flex: 1, minHeight: 0 }}>
-                {/* The key keeps each tab a separate Studio instance; without
-                    it React reuses one instance and swapping `data` or
-                    `initialState` is rejected as a reactive update. */}
                 <AgStudio
-                    key={`${activeTab.id}:${generation}`}
                     theme={theme}
                     style={{ height: '100%', width: '100%' }}
                     data={data}
                     initialState={initialState}
                     mode={mode}
-                    onStudioReady={() => console.log(`AG Studio (${activeTab.id}) is ready`)}
+                    onApiReady={onApiReady}
+                    onStudioReady={() => console.log('AG Studio is ready')}
                     onStateUpdated={onStateUpdated}
                 />
             </div>

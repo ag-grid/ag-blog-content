@@ -1,15 +1,16 @@
 import type { AgReportState } from 'ag-studio';
 
 // Reports are persisted to localStorage so a browser refresh restores the
-// tabs the user had open along with each tab's Studio state.
+// tabs the user had open along with the Studio state holding their pages.
 const STORAGE_KEY = 'studio-playground.workspace';
 
+/** A tab in the app's tab bar; `id` is the id of the Studio page it shows. */
 export type SavedTab = { id: string; label: string };
 
 export type SavedWorkspace = {
     tabs: SavedTab[];
-    /** Latest Studio state per tab id. */
-    states: Record<string, AgReportState>;
+    /** Latest Studio state, with one page per tab. */
+    state: AgReportState;
 };
 
 export function loadWorkspace(): SavedWorkspace | undefined {
@@ -19,8 +20,9 @@ export function loadWorkspace(): SavedWorkspace | undefined {
 
         const parsed = JSON.parse(raw) as Partial<SavedWorkspace>;
         if (!Array.isArray(parsed.tabs) || parsed.tabs.length === 0) return undefined;
+        if (!Array.isArray(parsed.state?.pages)) return undefined;
 
-        return { tabs: parsed.tabs, states: parsed.states ?? {} };
+        return { tabs: parsed.tabs, state: parsed.state };
     } catch (error) {
         // Corrupt or unreadable storage (e.g. a private-mode browser) should
         // never stop the app loading — fall back to the default report.
