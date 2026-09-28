@@ -3,9 +3,8 @@ import { studioTheme } from 'ag-studio';
 // to use myTheme in an application, pass it to the theme option
 export const theme = studioTheme
     .withParams({
-        accentColor: "#3A5C8A",
-        // backgroundColor: "#F4F7FB",
-        borderColor: "#D8DFE8",
+        accentColor: "#1B6FC9",
+        borderColor: "#D4DEE8",
         borderRadius: 8,
         borderWidth: 1,
         browserColorScheme: "light",
@@ -15,23 +14,23 @@ export const theme = studioTheme
             },
             "sans-serif"
         ],
-        chartPaletteFills1Color: "#215AA2",
-        chartPaletteFills2Color: "#60B46F",
-        chartPaletteFills3Color: "#674698",
-        chartPaletteFills4Color: "#00B7B7",
-        chartPaletteFills5Color: "#8E3665",
-        chartPaletteFills6Color: "#20ADDE",
-        chartPaletteFills7Color: "#0E6D2C",
-        chartPaletteFills8Color: "#AB8BE3",
-        chartPaletteFills9Color: "#006F71",
-        chartPaletteFills10Color: "#66A0EE",
-        chartPaletteFills11Color: "#DA7BAA",
-        chartPaletteFills12Color: "#006693",
+        chartPaletteFills1Color: "#17A398",
+        chartPaletteFills2Color: "#1B6FC9",
+        chartPaletteFills3Color: "#5D45BC",
+        chartPaletteFills4Color: "#c74059",
+        chartPaletteFills5Color: "#B46523",
+        chartPaletteFills6Color: "#DDAB28",
+        chartPaletteFills7Color: "#3FA34D",
+        chartPaletteFills8Color: "#145397",
+        chartPaletteFills9Color: "#45B5AD",
+        chartPaletteFills10Color: "#2D3237",
+        chartPaletteFills11Color: "#D16C5E",
+        chartPaletteFills12Color: "#A6801E",
         dropdownShadow: {
             offsetX: 0,
             offsetY: 4,
             radius: 12,
-            color: "#16223214"
+            color: "#12243814"
         },
         fontFamily: [
             {
@@ -40,14 +39,14 @@ export const theme = studioTheme
             "sans-serif"
         ],
         fontSize: 14,
-        foregroundColor: "#162232CC",
+        foregroundColor: "#122438CC",
         gridCellFontFamily: [
             {
                 googleFont: "DM Sans"
             },
             "sans-serif"
         ],
-        gridCellTextColor: "#162232CC",
+        gridCellTextColor: "#122438CC",
         gridCellFontSize: 14,
         gridFontFamily: [
             {
@@ -65,7 +64,7 @@ export const theme = studioTheme
         gridHeaderFontSize: 14,
         gridHeaderFontWeight: 500,
         spacing: 8,
-        studioCanvasBackgroundColor: "#eaeef3",
+        studioCanvasBackgroundColor: "#E6EDF5",
         studioCanvasFontFamily: [
             {
                 googleFont: "DM Sans"
@@ -84,7 +83,7 @@ export const theme = studioTheme
         // studioWidgetPadding: 12, // EXPECTED INNER PADDING 
         // studioValueWidgetFontWeight: "bold", // ADD THIS OPTION
         studioWidgetTitleFontSize: 18,
-        studioWidgetTitleTextColor: "#1f2d41cc",
+        studioWidgetTitleTextColor: "#122438b5",
         studioWidgetCaptionFontFamily: [
             {
                 googleFont: "DM Sans"
@@ -104,6 +103,6 @@ export const theme = studioTheme
             },
             "sans-serif"
         ],
-        subtleTextColor: "#5E6A7A",
-        textColor: "#162232"
+        subtleTextColor: "#58697C",
+        textColor: "#122438"
     });
