@@ -1,43 +1,40 @@
 import type { AgAiStudioTools, AgAiTool, AgStudioApi } from 'ag-studio';
 
-/**
- * One tool the page can offer. `build` is called on every reconcile pass rather than held, so each
- * instance reads the state it is reconciled against - a tool bound to a widget that has since been
- * deleted is never rebuilt, and so leaves the catalogue on its own.
- */
-export interface StudioToolEntry {
+/** A Studio tool the page can offer. */
+export interface ToolEntry {
     name: string;
-    /** One line for the listing, so an agent can choose without registering anything first. */
+    /** One line for the tool library, so an agent can choose a tool without registering it first. */
     summary: string;
     readOnly: boolean;
-    /** Registered from the start and never withdrawn. */
+    /** Published from the start and never withdrawn. */
     base: boolean;
+    /** Called on every reconcile pass, so the tool always reflects the current dashboard. */
     build(): AgAiTool;
 }
 
 /**
- * The tools registered before an agent asks for anything. Deliberately small: a browser imposes a
- * budget on the tools and schemas a page may publish, and Chrome disables WebMCP for the whole
- * page when it is exceeded, so the default set has to leave room for whatever the agent then
- * chooses. These two describe the data and the dashboard's structure, which is enough to decide
- * what else is needed.
+ * Published before the agent asks for anything. Kept small because Chrome disables WebMCP for the
+ * whole page if its tools and schemas exceed the browser's budget. These two describe the data and
+ * the dashboard, which is enough for an agent to work out what else it needs.
  */
-const BASE_TOOL_NAMES = ['view_schema', 'view_report'];
+const BASE_TOOLS = new Set(['view_schema', 'view_report']);
+
+function entry(name: string, summary: string, readOnly: boolean, build: () => AgAiTool): ToolEntry {
+    return { name, summary, readOnly, base: BASE_TOOLS.has(name), build };
+}
 
 /**
- * A WebMCP tool name has to be stable and unique for as long as the widget behind it exists, and
- * a widget id is free-form. Anything outside the conservative character set becomes an underscore,
- * and a collision between two ids that flatten to the same text takes a numeric suffix, so two
- * widgets never contend for one registration.
+ * Tool names must be stable and unique, but widget ids are free-form. Characters outside
+ * `[a-z0-9_]` become underscores, and ids that collide after that get a numeric suffix.
  */
 function configureToolNames(widgetIds: readonly string[]): Map<string, string> {
-    const taken = new Set<string>();
     const names = new Map<string, string>();
+    const taken = new Set<string>();
     for (const widgetId of widgetIds) {
-        const flattened = widgetId.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-        let name = `configure_widget__${flattened}`;
+        const base = `configure_widget__${widgetId.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`;
+        let name = base;
         for (let suffix = 2; taken.has(name); ++suffix) {
-            name = `configure_widget__${flattened}_${suffix}`;
+            name = `${base}_${suffix}`;
         }
         taken.add(name);
         names.set(widgetId, name);
@@ -46,50 +43,33 @@ function configureToolNames(widgetIds: readonly string[]): Map<string, string> {
 }
 
 /**
- * One `configure_widget` per widget on the selected page. The built-in factory binds a listing to
- * one widget, so its config schema is the one for that widget's type - the thing that makes a
- * valid configuration reachable in a single call. Binding costs a tool name per widget, which is
- * what the rename is for, and it is why these are never registered by default: a dashboard's worth
- * of widget-configuration schemas is the single largest thing this page could publish.
- *
- * Note the rename moves the `aiToolDisplay` lookup too, which is keyed by tool name: harmless
- * here, because nothing renders these in Studio's chat panel, but a harness doing the same would
- * lose the widget-configuration row's presentation.
+ * One configure tool per widget on the selected page. Binding the tool to a widget gives it that
+ * widget type's config schema, so a valid configuration is a single call away. Those schemas are
+ * the largest thing the page could publish, which is why none of these are published by default.
  */
-function configureWidgetEntries(studio: AgAiStudioTools, api: AgStudioApi): StudioToolEntry[] {
+function configureWidgetEntries(studio: AgAiStudioTools, api: AgStudioApi): ToolEntry[] {
     const state = api.getState();
-    const page = state.pages.find(({ id }) => id === state.selectedPageId);
-    const widgets = page?.widgets ?? {};
+    const widgets = state.pages.find(({ id }) => id === state.selectedPageId)?.widgets ?? {};
     const names = configureToolNames(Object.keys(widgets));
 
-    const entries: StudioToolEntry[] = [];
-    for (const [widgetId, config] of Object.entries(widgets)) {
+    return Object.entries(widgets).flatMap(([widgetId, config]) => {
         const widgetType = config?.type;
-        // A widget whose state carries no type cannot pick a configuration schema, so it gets no
-        // tool rather than one that would reject every call.
-        if (widgetType == null) continue;
+        // Without a type there is no config schema to bind to.
+        if (widgetType == null) return [];
         const name = names.get(widgetId)!;
-        entries.push({
-            name,
-            summary: `Configure the ${widgetType} widget "${widgetId}". Large schema; register it only when changing that widget.`,
-            readOnly: false,
-            base: false,
-            build: () => studio.configureWidget({ widgetType, widgetId }, { name }),
-        });
-    }
-    return entries;
+        return [
+            entry(
+                name,
+                `Configure the ${widgetType} widget "${widgetId}". Large schema; register it only when changing that widget.`,
+                false,
+                () => studio.configureWidget({ widgetType, widgetId }, { name })
+            ),
+        ];
+    });
 }
 
-/** Every Studio tool this page can offer, rebuilt against current state on each pass. */
-export function studioToolEntries(studio: AgAiStudioTools, api: AgStudioApi): StudioToolEntry[] {
-    const entry = (name: string, summary: string, readOnly: boolean, build: () => AgAiTool): StudioToolEntry => ({
-        name,
-        summary,
-        readOnly,
-        base: BASE_TOOL_NAMES.includes(name),
-        build,
-    });
-
+/** Every Studio tool the page can offer, built against the current dashboard state. */
+export function getToolEntries(studio: AgAiStudioTools, api: AgStudioApi): ToolEntry[] {
     return [
         entry('view_schema', 'Describe the tables, fields and calculated fields available.', true, () =>
             studio.viewSchema()

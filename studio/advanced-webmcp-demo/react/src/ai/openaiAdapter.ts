@@ -1,13 +1,14 @@
 /**
  * OpenAI Responses API adapter for AG Studio.
  *
- * This is example code - copy it into your project and adapt as needed.
- * It maps between AG Studio's AI types and the OpenAI Responses API,
- * handling encoding (AG → OpenAI), decoding (OpenAI → AG), and SSE streaming.
+ * Maps between AG Studio's AI types and the OpenAI Responses API: encoding (AG → OpenAI),
+ * decoding (OpenAI → AG) and SSE streaming. Adapted from the adapter in the AG Studio docs.
  */
 import type {
     AgAiConversationItem,
     AgAiEvent,
+    AgAiMessageAnnotation,
+    AgAiMessageStatus,
     AgAiOutputContent,
     AgAiOutputItem,
     AgAiOutputMessage,
@@ -22,22 +23,84 @@ import type {
 } from 'ag-studio';
 
 // =============================================================================
-// OpenAI Types (hand-written, minimal)
+// OpenAI Types (hand-written, covering only what is decoded)
 // =============================================================================
 
-interface OpenAiAdapterOptions {
+export interface OpenAiAdapterOptions {
+    /** Sent as a Bearer token when set. */
     key?: string;
     endpoint?: string;
     model?: string;
-    organization?: string;
 }
 
 interface OpenAiConfig {
     endpoint: string;
     key?: string;
     model: string;
-    organization?: string;
 }
+
+type OpenAiAnnotation =
+    | { type: 'file_path'; file_id: string; index: number }
+    | { type: 'file_citation'; file_id: string; index: number; filename: string }
+    | { type: 'url_citation'; url: string; start_index: number; end_index: number; title: string }
+    | {
+          type: 'container_file_citation';
+          container_id: string;
+          file_id: string;
+          start_index: number;
+          end_index: number;
+          filename: string;
+      };
+
+type OpenAiOutputContent =
+    { type: 'output_text'; text: string; annotations?: OpenAiAnnotation[] } | { type: 'refusal'; refusal: string };
+
+type OpenAiOutputItem =
+    | { type: 'message'; id?: string; status?: AgAiMessageStatus; content: OpenAiOutputContent[] }
+    | {
+          type: 'function_call';
+          id?: string;
+          call_id: string;
+          name: string;
+          arguments?: string;
+          status?: AgAiMessageStatus;
+      }
+    | { type: 'reasoning'; id?: string; summary: { text: string }[]; content?: { text: string }[] };
+
+interface OpenAiResponse {
+    id: string;
+    created_at: number;
+    model?: string;
+    status: AgLlmResponse['status'];
+    output: OpenAiOutputItem[];
+    error?: { code: string; message: string } | null;
+    incomplete_details?: { reason: NonNullable<AgLlmResponse['incompleteDetails']>['reason'] } | null;
+    usage?: {
+        input_tokens: number;
+        output_tokens: number;
+        total_tokens: number;
+        input_tokens_details?: { cached_tokens?: number; cache_write_tokens?: number };
+        output_tokens_details?: { reasoning_tokens?: number };
+    };
+}
+
+/** The stream events this adapter reads. Anything else is ignored. */
+type OpenAiStreamEvent =
+    | { type: 'response.output_item.added' | 'response.output_item.done'; item: OpenAiOutputItem }
+    | {
+          type:
+              | 'response.output_text.delta'
+              | 'response.refusal.delta'
+              | 'response.reasoning_text.delta'
+              | 'response.reasoning_summary_text.delta'
+              | 'response.function_call_arguments.delta';
+          item_id: string;
+          delta: string;
+      }
+    | { type: 'response.completed'; response: OpenAiResponse }
+    | { type: 'response.failed' | 'response.incomplete'; response?: OpenAiResponse }
+    | { type: 'error'; code?: string; message: string }
+    | { type: 'keepalive' };
 
 // =============================================================================
 // JSON Schema → OpenAI strict-mode subset
@@ -45,7 +108,7 @@ interface OpenAiConfig {
 //
 // The Shape library emits JSON Schema 2020-12. OpenAI's Responses API in
 // `strict: true` mode accepts only a narrow subset. This transform bridges the
-// two so docs examples work against OpenAI without forcing Shape authors to
+// two so tool schemas work against OpenAI without forcing Shape authors to
 // know the quirks.
 //
 // What OpenAI accepts: object/array/string/number/integer/boolean/enum/anyOf,
@@ -359,15 +422,13 @@ function stripNullsFromToolArgs(argsJson: string): string {
     return JSON.stringify(stripNulls(parsed));
 }
 
-function decodeAnnotations(annotations: any[]): any[] {
-    return (annotations ?? []).map((ann: any) => {
-        if (ann.type === 'file_path') {
+function decodeAnnotation(ann: OpenAiAnnotation): AgAiMessageAnnotation {
+    switch (ann.type) {
+        case 'file_path':
             return { type: 'file_path', fileId: ann.file_id, index: ann.index };
-        }
-        if (ann.type === 'file_citation') {
+        case 'file_citation':
             return { type: 'file_citation', fileId: ann.file_id, index: ann.index, filename: ann.filename };
-        }
-        if (ann.type === 'url_citation') {
+        case 'url_citation':
             return {
                 type: 'url_citation',
                 url: ann.url,
@@ -375,8 +436,7 @@ function decodeAnnotations(annotations: any[]): any[] {
                 endIndex: ann.end_index,
                 title: ann.title,
             };
-        }
-        if (ann.type === 'container_file_citation') {
+        case 'container_file_citation':
             return {
                 type: 'container_file_citation',
                 containerId: ann.container_id,
@@ -385,77 +445,72 @@ function decodeAnnotations(annotations: any[]): any[] {
                 endIndex: ann.end_index,
                 filename: ann.filename,
             };
-        }
-        return ann;
-    });
-}
-
-function decodeOutputContent(input: Record<string, any>): AgAiOutputContent {
-    if (input.type === 'output_text') {
-        return {
-            type: 'text',
-            text: input.text,
-            annotations: decodeAnnotations(input.annotations),
-        };
     }
-    return input as AgAiOutputContent;
 }
 
-function decodeOutputItem(input: Record<string, any>): AgAiOutputItem {
-    switch (input.type) {
+function decodeOutputContent(content: OpenAiOutputContent): AgAiOutputContent {
+    if (content.type === 'output_text') {
+        return { type: 'text', text: content.text, annotations: (content.annotations ?? []).map(decodeAnnotation) };
+    }
+    return content;
+}
+
+function decodeOutputItem(item: OpenAiOutputItem): AgAiOutputItem {
+    switch (item.type) {
         case 'message': {
             const message: AgAiOutputMessage = {
-                id: input.id ?? '',
+                id: item.id ?? '',
                 kind: 'output',
                 type: 'message',
                 role: 'assistant',
-                status: input.status ?? 'completed',
-                content: input.content.map(decodeOutputContent),
+                status: item.status ?? 'completed',
+                content: item.content.map(decodeOutputContent),
             };
             return message;
         }
         case 'function_call':
             return {
-                id: input.id ?? '',
+                id: item.id ?? '',
                 kind: 'output',
                 type: 'function_call',
-                callId: input.call_id,
-                name: input.name,
-                arguments: stripNullsFromToolArgs(input.arguments ?? ''),
-                status: input.status,
+                callId: item.call_id,
+                name: item.name,
+                arguments: stripNullsFromToolArgs(item.arguments ?? ''),
+                status: item.status,
             };
         case 'reasoning': {
             const reasoning: AgAiReasoningItem = {
-                id: input.id ?? '',
+                id: item.id ?? '',
                 kind: 'output',
                 type: 'reasoning',
-                summary: input.summary.map((s: any) => ({ type: 'summary', text: s.text })),
-                content: input.content?.map((c: any) => ({ type: 'text', text: c.text })),
+                summary: item.summary.map((summary) => ({ type: 'summary', text: summary.text })),
+                content: item.content?.map((content) => ({ type: 'text', text: content.text })),
             };
             return reasoning;
         }
         default:
-            throw new Error(`Unknown output item type: ${input.type}`);
+            throw new Error(`Unknown output item type: ${(item as { type: string }).type}`);
     }
 }
 
-function decodeResponse(input: Record<string, any>): AgLlmResponse {
+function decodeResponse(response: OpenAiResponse): AgLlmResponse {
+    const { usage } = response;
     return {
-        id: input.id,
-        createdAt: input.created_at,
-        model: input.model,
-        incompleteDetails: input.incomplete_details ? { reason: input.incomplete_details.reason } : undefined,
-        output: input.output.map(decodeOutputItem),
-        status: input.status,
-        error: input.error ? { code: input.error.code, message: input.error.message } : undefined,
-        usage: input.usage
+        id: response.id,
+        createdAt: response.created_at,
+        model: response.model,
+        incompleteDetails: response.incomplete_details ? { reason: response.incomplete_details.reason } : undefined,
+        output: response.output.map(decodeOutputItem),
+        status: response.status,
+        error: response.error ? { code: response.error.code, message: response.error.message } : undefined,
+        usage: usage
             ? {
-                  inputTokens: input.usage.input_tokens,
-                  outputTokens: input.usage.output_tokens,
-                  totalTokens: input.usage.total_tokens,
-                  reasoningTokens: input.usage.output_tokens_details?.reasoning_tokens,
-                  cachedInputTokens: input.usage.input_tokens_details?.cached_tokens,
-                  cacheWriteTokens: input.usage.input_tokens_details?.cache_write_tokens,
+                  inputTokens: usage.input_tokens,
+                  outputTokens: usage.output_tokens,
+                  totalTokens: usage.total_tokens,
+                  reasoningTokens: usage.output_tokens_details?.reasoning_tokens,
+                  cachedInputTokens: usage.input_tokens_details?.cached_tokens,
+                  cacheWriteTokens: usage.input_tokens_details?.cache_write_tokens,
               }
             : undefined,
     };
@@ -479,7 +534,7 @@ class ResponseStreamTranslator {
     private readonly kindByItemId = new Map<string, 'message' | 'reasoning' | 'function_call'>();
 
     /** The events one SSE payload maps to. Anything not recognised is ignored, not an error. */
-    translate(input: Record<string, any>, outcome: TurnOutcome): AgAiEvent[] {
+    translate(input: OpenAiStreamEvent, outcome: TurnOutcome): AgAiEvent[] {
         switch (input.type) {
             case 'response.output_item.added':
                 return this.open(input.item);
@@ -510,31 +565,33 @@ class ResponseStreamTranslator {
         }
     }
 
-    private open(item: Record<string, any>): AgAiEvent[] {
-        switch (item?.type) {
+    private open(item: OpenAiOutputItem): AgAiEvent[] {
+        const id = item.id ?? '';
+        switch (item.type) {
             case 'message':
-                this.kindByItemId.set(item.id, 'message');
-                return [{ type: 'TEXT_MESSAGE_START', messageId: item.id, role: 'assistant' }];
+                this.kindByItemId.set(id, 'message');
+                return [{ type: 'TEXT_MESSAGE_START', messageId: id, role: 'assistant' }];
             case 'reasoning':
-                this.kindByItemId.set(item.id, 'reasoning');
-                return [{ type: 'REASONING_MESSAGE_START', messageId: item.id, role: 'reasoning' }];
+                this.kindByItemId.set(id, 'reasoning');
+                return [{ type: 'REASONING_MESSAGE_START', messageId: id, role: 'reasoning' }];
             case 'function_call':
-                this.kindByItemId.set(item.id, 'function_call');
-                this.callIdByItemId.set(item.id, item.call_id);
+                this.kindByItemId.set(id, 'function_call');
+                this.callIdByItemId.set(id, item.call_id);
                 return [{ type: 'TOOL_CALL_START', toolCallId: item.call_id, toolCallName: item.name }];
             default:
                 return [];
         }
     }
 
-    private close(item: Record<string, any>): AgAiEvent[] {
-        switch (this.kindByItemId.get(item?.id)) {
+    private close(item: OpenAiOutputItem): AgAiEvent[] {
+        const id = item.id ?? '';
+        switch (this.kindByItemId.get(id)) {
             case 'message':
-                return [{ type: 'TEXT_MESSAGE_END', messageId: item.id }];
+                return [{ type: 'TEXT_MESSAGE_END', messageId: id }];
             case 'reasoning':
-                return [{ type: 'REASONING_MESSAGE_END', messageId: item.id }];
+                return [{ type: 'REASONING_MESSAGE_END', messageId: id }];
             case 'function_call': {
-                const toolCallId = this.callIdByItemId.get(item.id);
+                const toolCallId = this.callIdByItemId.get(id);
                 return toolCallId ? [{ type: 'TOOL_CALL_END', toolCallId }] : [];
             }
             default:
@@ -559,8 +616,7 @@ async function* streamOpenAi(
             return [];
         }
         try {
-            const parsed = JSON.parse(payload);
-            return parsed.type === 'keepalive' ? [] : translator.translate(parsed, outcome);
+            return translator.translate(JSON.parse(payload) as OpenAiStreamEvent, outcome);
         } catch (error) {
             outcome.error ??= error instanceof Error ? error : new Error(String(error));
             return [];
@@ -572,7 +628,6 @@ async function* streamOpenAi(
         headers: {
             'Content-Type': 'application/json',
             ...(config.key && { Authorization: `Bearer ${config.key}` }),
-            ...(config.organization && { 'OpenAI-Organization': config.organization }),
         },
         body: JSON.stringify(requestBody),
         signal,
@@ -705,7 +760,6 @@ export function openaiAdapter(options: OpenAiAdapterOptions): AgLlmAdapter {
         endpoint: options.endpoint ?? 'https://api.openai.com/v1',
         key: options.key,
         model: options.model ?? 'gpt-5.4-mini',
-        organization: options.organization,
     };
 
     return {

@@ -6,65 +6,36 @@ import type {
     AgRelationDefinition,
 } from 'ag-studio';
 
-// NOAA GHCN-Daily "world cities" dataset. Weather facts are stored column-wise as
-// raw GHCN integers (temperatures/precip in tenths, snow in mm) with dates as
-// integer days since 1970-01-01; the scaling and date conversion below are the
-// "format in the browser" step, so the shipped asset stays maximally compact.
-//
-// The asset base URL is supplied by the caller (a docs example passes its
-// substituted asset path; the eval harness passes its own served path), so this
-// canonical dataset is not bound to any one host's asset layout.
+/**
+ * NOAA GHCN-Daily weather for 39 world cities. The weather facts ship column-wise as raw GHCN
+ * integers (temperatures and precipitation in tenths, snow in mm, dates as days since 1970-01-01)
+ * to keep the asset small, and are converted to display units here.
+ */
+
 const MS_PER_DAY = 86_400_000;
 
-// Raw column arrays keyed by field id, exactly as emitted by the generator
-// (cityId/date are integer arrays; the measures may contain nulls).
-type WeatherColumns = Record<string, (number | null)[]>;
+/** Fields stored in tenths of a unit. */
+const TENTHS_FIELDS = new Set(['tmax', 'tmin', 'prcp']);
 
-// Keyed by base URL, not held once per process: the whole point of taking the URL from the caller
-// is that two callers in one process can serve the asset from different roots, and a single cache
-// would hand the second caller the first one's data.
-const rawColumnsByBaseUrl = new Map<string, Promise<WeatherColumns>>();
-const columnCache = new Map<string, (number | null)[]>();
+type Column = (number | null)[];
 
-function loadRawColumns(baseUrl: string): Promise<WeatherColumns> {
-    let columns = rawColumnsByBaseUrl.get(baseUrl);
-    if (columns == null) {
-        columns = fetch(`${baseUrl}/weather.columns.json`).then((r) => r.json());
-        rawColumnsByBaseUrl.set(baseUrl, columns);
-    }
-    return columns;
+function memoise<T>(load: () => Promise<T>): () => Promise<T> {
+    let result: Promise<T> | undefined;
+    return () => (result ??= load());
 }
 
-// Column values are transformed to display units once and memoised - repeated
-// queries for the same field reuse the converted array.
-async function getWeatherColumn(baseUrl: string, fieldId: string): Promise<(number | null)[]> {
-    const cacheKey = `${baseUrl}\u0000${fieldId}`;
-    const cached = columnCache.get(cacheKey);
-    if (cached != null) {
-        return cached;
-    }
-    const raw = await loadRawColumns(baseUrl);
-    const source = raw[fieldId] ?? [];
-    let column: (number | null)[];
+const fetchJson = <T>(url: string): Promise<T> => fetch(url).then((response) => response.json() as Promise<T>);
+
+function toDisplayUnits(fieldId: string, raw: Column): Column {
     if (fieldId === 'date') {
-        // Dates reach the engine as epoch milliseconds, which is the cheapest form it accepts:
-        // it converts them with a single division, where an ISO string costs a regex test and
-        // three slices per row. Two constraints on this line:
-        //  - The multiply is required. A bare number is read as milliseconds, so passing the
-        //    stored day integers straight through is not an error, it silently lands every
-        //    observation in 1970.
-        //  - Do not wrap this in a `new Date(...)`. A Date is read through local calendar
-        //    accessors while a number is read as UTC, so a UTC-midnight Date decodes to the
-        //    previous day anywhere west of Greenwich - the dataset would shift by a day
-        //    depending on the reader's timezone.
-        column = source.map((day) => (day == null ? null : day * MS_PER_DAY));
-    } else if (fieldId === 'tmax' || fieldId === 'tmin' || fieldId === 'prcp') {
-        column = source.map((value) => (value == null ? null : value / 10));
-    } else {
-        column = source;
+        // Epoch milliseconds are the cheapest date form Studio accepts. Keep them as numbers:
+        // a Date is read in local time, which would shift every day west of Greenwich.
+        return raw.map((day) => (day == null ? null : day * MS_PER_DAY));
     }
-    columnCache.set(cacheKey, column);
-    return column;
+    if (TENTHS_FIELDS.has(fieldId)) {
+        return raw.map((value) => (value == null ? null : value / 10));
+    }
+    return raw;
 }
 
 const weatherFields: AgFieldDefinition[] = [
@@ -192,6 +163,18 @@ const cityFields: AgFieldDefinition[] = [
 ];
 
 function getWeatherSource(baseUrl: string): AgDataSourceDefinition<'column'> {
+    const loadColumns = memoise(() => fetchJson<Record<string, Column>>(`${baseUrl}/weather.columns.json`));
+    const converted = new Map<string, Column>();
+
+    async function getColumn(fieldId: string): Promise<Column> {
+        let column = converted.get(fieldId);
+        if (column == null) {
+            column = toDisplayUnits(fieldId, (await loadColumns())[fieldId] ?? []);
+            converted.set(fieldId, column);
+        }
+        return column;
+    }
+
     return {
         id: 'weather',
         name: 'Daily Weather',
@@ -205,23 +188,12 @@ function getWeatherSource(baseUrl: string): AgDataSourceDefinition<'column'> {
                 fields: weatherFields,
             },
         ],
-        getData: async (_tableId, fieldIds) => ({
-            data: await Promise.all(fieldIds.map((fieldId) => getWeatherColumn(baseUrl, fieldId))),
-        }),
+        getData: async (_tableId, fieldIds) => ({ data: await Promise.all(fieldIds.map(getColumn)) }),
     };
 }
 
-const citiesByBaseUrl = new Map<string, Promise<Record<string, unknown>[]>>();
-function loadCities(baseUrl: string): Promise<Record<string, unknown>[]> {
-    let cities = citiesByBaseUrl.get(baseUrl);
-    if (cities == null) {
-        cities = fetch(`${baseUrl}/cities.json`).then((r) => r.json());
-        citiesByBaseUrl.set(baseUrl, cities);
-    }
-    return cities;
-}
-
 function getCitiesSource(baseUrl: string): AgDataSourceDefinition<'row'> {
+    const loadCities = memoise(() => fetchJson<Record<string, unknown>[]>(`${baseUrl}/cities.json`));
     return {
         id: 'cities',
         name: 'Cities',
@@ -235,7 +207,7 @@ function getCitiesSource(baseUrl: string): AgDataSourceDefinition<'row'> {
                 fields: cityFields,
             },
         ],
-        getData: async () => ({ data: await loadCities(baseUrl) }),
+        getData: async () => ({ data: await loadCities() }),
     };
 }
 
@@ -368,7 +340,8 @@ const expressions: AgExpressionFieldDefinition[] = [
     },
 ];
 
-export function getGhcnCitiesData(assetsBaseUrl: string): AgDataSourcesDefinition {
+/** The data sources, relationships and measures for the weather dashboard. */
+export function getWeatherData(assetsBaseUrl: string): AgDataSourcesDefinition {
     const baseUrl = `${assetsBaseUrl}/ghcn-cities`;
     return {
         description:
@@ -385,8 +358,7 @@ export function getGhcnCitiesData(assetsBaseUrl: string): AgDataSourcesDefinitio
         sources: [getWeatherSource(baseUrl), getCitiesSource(baseUrl)],
         relationships,
         expressions,
-        // Generated spine covering the ~100-year data window (see the generator's
-        // --start-year). Keep `from`/`to` aligned with the data on each release refresh.
+        // Covers the dataset's date range.
         calendars: [
             {
                 id: 'calendar',

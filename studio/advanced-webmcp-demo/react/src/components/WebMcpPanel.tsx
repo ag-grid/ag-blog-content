@@ -1,28 +1,31 @@
-import type { WebMcpSnapshot } from '../studioWebMcp.ts';
+import type { WebMcpSnapshot } from '../studio/mountStudio.ts';
 
-/**
- * What a browser agent can currently see of the page. Read-only: every change here is made by the
- * agent calling tools, which is the point of the demo.
- */
-export function WebMcpPanel({ snapshot }: { snapshot: WebMcpSnapshot }) {
-    const { supported, handoffConfigured, advertised, catalogue, callLog, lastError } = snapshot;
-    const advertisedNames = new Set(advertised.map(({ name }) => name));
-    const available = catalogue.filter(({ name }) => !advertisedNames.has(name));
+interface WebMcpPanelProps {
+    snapshot: WebMcpSnapshot;
+}
+
+/** What a browser agent can currently see of the page. Read-only: the agent makes every change. */
+export function WebMcpPanel({ snapshot }: WebMcpPanelProps) {
+    const { supported, handoffEnabled, published, library, log, error } = snapshot;
+    const publishedNames = new Set(published.map(({ name }) => name));
+    const unpublished = library.filter(({ name }) => !publishedNames.has(name));
 
     return (
         <aside className="webmcp-panel">
             <h2>WebMCP</h2>
-            <p className={supported ? 'status ok' : 'status warn'}>
-                {supported
-                    ? 'document.modelContext found - tools are published to the browser.'
-                    : 'This browser has no WebMCP support, so nothing is published. Bookkeeping still runs.'}
-            </p>
-            {!handoffConfigured && <p className="status muted">No AI endpoint set, so ask_studio_analyst is off.</p>}
-            {lastError && <p className="status error">{lastError}</p>}
+            {supported ? (
+                <p className="status ok">document.modelContext found - tools are published to the browser.</p>
+            ) : (
+                <p className="status warn">
+                    This browser has no WebMCP support, so nothing is published. Bookkeeping still runs.
+                </p>
+            )}
+            {!handoffEnabled && <p className="status muted">No AI endpoint set, so ask_studio_analyst is off.</p>}
+            {error && <p className="status error">{error}</p>}
 
-            <h3>Published ({advertised.length})</h3>
+            <h3>Published ({published.length})</h3>
             <ul className="tools">
-                {advertised.map(({ name, registrations }) => (
+                {published.map(({ name, registrations }) => (
                     <li key={name}>
                         {name}
                         {registrations > 1 && <span className="badge">×{registrations}</span>}
@@ -30,20 +33,20 @@ export function WebMcpPanel({ snapshot }: { snapshot: WebMcpSnapshot }) {
                 ))}
             </ul>
 
-            <h3>In the library ({available.length})</h3>
+            <h3>In the library ({unpublished.length})</h3>
             <ul className="tools muted">
-                {available.map(({ name }) => (
+                {unpublished.map(({ name }) => (
                     <li key={name}>{name}</li>
                 ))}
             </ul>
 
             <h3>Call log</h3>
-            {callLog.length === 0 ? (
+            {log.length === 0 ? (
                 <p className="status muted">No calls yet.</p>
             ) : (
                 <ol className="log">
-                    {callLog.map((line, i) => (
-                        <li key={i}>{line}</li>
+                    {log.map(({ id, text }) => (
+                        <li key={id}>{text}</li>
                     ))}
                 </ol>
             )}

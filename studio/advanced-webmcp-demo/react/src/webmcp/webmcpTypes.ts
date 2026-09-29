@@ -1,16 +1,11 @@
 /**
- * Structural types for the experimental WebMCP browser API (`document.modelContext`), which is
- * absent from `lib.dom`. Covers only what this example calls.
+ * Types for the experimental WebMCP browser API (`document.modelContext`), which is not yet in
+ * `lib.dom`. Covers only what this demo uses.
  */
-export interface WebMcpToolAnnotations {
-    readOnlyHint?: boolean;
-    untrustedContentHint?: boolean;
-}
 
 /**
- * A tool result in the MCP `CallToolResult` shape the browser expects back from `execute`. Returning
- * a bare string instead leaves the browser with no `content` to render, so the call reports success
- * with no output.
+ * A tool result in the MCP `CallToolResult` shape. The browser renders the `content` array, so a
+ * bare string would report success with no output.
  */
 export interface WebMcpToolResult {
     content: Array<{ type: 'text'; text: string }>;
@@ -19,39 +14,22 @@ export interface WebMcpToolResult {
 export interface WebMcpToolDescriptor {
     name: string;
     description: string;
-    /** JSON Schema for the tool's arguments. The browser serialises it, so the shape is opaque here. */
+    /** JSON Schema for the tool's arguments. */
     inputSchema: unknown;
-    annotations?: WebMcpToolAnnotations;
-    execute(args: Record<string, unknown>): WebMcpToolResult | Promise<WebMcpToolResult>;
-}
-
-export interface WebMcpRegisterOptions {
-    signal?: AbortSignal;
-    exposedTo?: string[];
-}
-
-/** A tool as reported back by `getTools()`: `inputSchema` arrives as a serialised JSON string. */
-export interface WebMcpAdvertisedToolDescriptor {
-    name: string;
-    description: string;
-    inputSchema: string;
+    annotations?: { readOnlyHint?: boolean };
+    execute(args: Record<string, unknown>): Promise<WebMcpToolResult>;
 }
 
 export interface WebMcpModelContext {
-    registerTool(descriptor: WebMcpToolDescriptor, options?: WebMcpRegisterOptions): Promise<void>;
-    getTools(options?: { fromOrigins?: string[] }): Promise<WebMcpAdvertisedToolDescriptor[]>;
-    executeTool(
-        tool: WebMcpAdvertisedToolDescriptor,
-        input: string,
-        options?: { signal?: AbortSignal }
-    ): Promise<WebMcpToolResult | string>;
+    /** Registers a tool until `signal` is aborted. */
+    registerTool(descriptor: WebMcpToolDescriptor, options?: { signal?: AbortSignal }): Promise<void>;
     addEventListener(type: 'toolchange', listener: () => void): void;
     removeEventListener(type: 'toolchange', listener: () => void): void;
 }
 
 declare global {
     interface Document {
-        /** Optional by design: the absence of this property is the feature detection for WebMCP. */
+        /** Absent in browsers without WebMCP, which makes this property the feature detection. */
         modelContext?: WebMcpModelContext;
     }
 }

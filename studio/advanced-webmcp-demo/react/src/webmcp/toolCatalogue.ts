@@ -1,11 +1,11 @@
 import type { AgAiStudioTools, AgStudioApi } from 'ag-studio';
 
-import type { StudioToolEntry } from './toolRegistry.ts';
-import { studioToolEntries } from './toolRegistry.ts';
-import type { WebMcpBridgedTool } from './webmcpBridge.ts';
+import type { ToolEntry } from './toolRegistry.ts';
+import { getToolEntries } from './toolRegistry.ts';
+import type { BridgedTool } from './webmcpBridge.ts';
 
-/** One tool as the listing reports it: what it is, and whether it is registered right now. */
-export interface CatalogueListing {
+/** A library tool and whether it is currently registered. */
+export interface ToolListing {
     name: string;
     summary: string;
     readOnly: boolean;
@@ -14,92 +14,74 @@ export interface CatalogueListing {
 }
 
 /**
- * What the page could offer, and what it currently does. The two are deliberately different: a
- * browser caps the tools and schemas one page may publish, so the advertised set is the base
- * tools plus whatever an agent has asked for by name, while the catalogue keeps every tool
- * describable and callable whether or not it is registered.
+ * The library of Studio tools versus the ones published right now: the base tools plus whatever
+ * the agent has registered by name. Keeping the two apart is what keeps the page inside the
+ * browser's budget.
  */
 export interface ToolCatalogue {
-    /** Every tool, with its current registration state. */
-    list(): CatalogueListing[];
-    /** One entry by name, registered or not. */
-    find(name: string): StudioToolEntry | undefined;
-    /** Registers by name. Returns the names it accepted; an unknown name is reported separately. */
+    list(): ToolListing[];
     register(names: readonly string[]): { accepted: string[]; unknown: string[] };
-    /** Unregisters by name. A base tool is never withdrawn, and comes back as `refused`. */
+    /** Base tools are never withdrawn; they come back as `refused`. */
     unregister(names: readonly string[]): { accepted: string[]; refused: string[]; unknown: string[] };
-    /** What the bridge should have registered right now. */
-    advertised(): WebMcpBridgedTool[];
-    /** The meta tools, supplied once by `main` and advertised on every pass. */
-    setMetaTools(tools: WebMcpBridgedTool[]): void;
-    /** The handoff tool, or nothing when no LLM is configured. */
-    setHandoffTool(tool?: WebMcpBridgedTool): void;
+    /** Adds tools that sit outside the library and are always published, such as the meta tools. */
+    pin(tools: readonly BridgedTool[]): void;
+    /** Everything that should be published right now. */
+    published(): BridgedTool[];
 }
 
 export function createToolCatalogue(api: AgStudioApi, studio: AgAiStudioTools): ToolCatalogue {
-    // Names, not built tools: a tool is rebuilt from the registry on every pass, and a name
-    // survives a widget being deleted and restored, so a choice the agent made still holds.
+    // Registrations are held by name rather than as built tools, so a choice survives a widget
+    // being deleted and restored.
     const registered = new Set<string>();
-    let metaTools: WebMcpBridgedTool[] = [];
-    let handoffTool: WebMcpBridgedTool | undefined;
+    const pinned: BridgedTool[] = [];
 
-    const entries = (): StudioToolEntry[] => studioToolEntries(studio, api);
-    const isOn = (entry: StudioToolEntry): boolean => entry.base || registered.has(entry.name);
+    const entries = (): ToolEntry[] => getToolEntries(studio, api);
+    const isRegistered = (entry: ToolEntry): boolean => entry.base || registered.has(entry.name);
 
     return {
         list: () =>
-            entries().map(({ name, summary, readOnly, base }) => ({
-                name,
-                summary,
-                readOnly,
-                base,
-                registered: base || registered.has(name),
+            entries().map((entry) => ({
+                name: entry.name,
+                summary: entry.summary,
+                readOnly: entry.readOnly,
+                base: entry.base,
+                registered: isRegistered(entry),
             })),
-        find: (name) => entries().find((entry) => entry.name === name),
+
         register(names) {
             const known = new Set(entries().map(({ name }) => name));
-            const accepted: string[] = [];
-            const unknown: string[] = [];
-            for (const name of names) {
-                if (!known.has(name)) {
-                    unknown.push(name);
-                    continue;
-                }
-                registered.add(name);
-                accepted.push(name);
-            }
+            const accepted = names.filter((name) => known.has(name));
+            const unknown = names.filter((name) => !known.has(name));
+            accepted.forEach((name) => registered.add(name));
             return { accepted, unknown };
         },
+
         unregister(names) {
             const byName = new Map(entries().map((entry) => [entry.name, entry]));
-            const accepted: string[] = [];
-            const refused: string[] = [];
-            const unknown: string[] = [];
+            const result = { accepted: [] as string[], refused: [] as string[], unknown: [] as string[] };
             for (const name of names) {
                 const entry = byName.get(name);
                 if (entry == null) {
-                    unknown.push(name);
+                    result.unknown.push(name);
                 } else if (entry.base) {
-                    refused.push(name);
+                    result.refused.push(name);
                 } else {
                     registered.delete(name);
-                    accepted.push(name);
+                    result.accepted.push(name);
                 }
             }
-            return { accepted, refused, unknown };
+            return result;
         },
-        advertised: () => [
-            ...metaTools,
-            ...(handoffTool != null ? [handoffTool] : []),
+
+        pin(tools) {
+            pinned.push(...tools);
+        },
+
+        published: () => [
+            ...pinned,
             ...entries()
-                .filter(isOn)
+                .filter(isRegistered)
                 .map((entry) => ({ tool: entry.build(), readOnly: entry.readOnly })),
         ],
-        setMetaTools(tools) {
-            metaTools = tools;
-        },
-        setHandoffTool(tool) {
-            handoffTool = tool;
-        },
     };
 }

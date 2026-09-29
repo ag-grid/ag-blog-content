@@ -1,30 +1,10 @@
 import type { AgReportState } from 'ag-studio';
 
 /**
- * Starting report states for the GHCN world-cities weather data, shared by the AI docs
- * examples and the eval harness so each one does not restate a dashboard it is not about.
- * Pair either state with `getGhcnCitiesData` from the sibling `data` module - the widgets
- * below reference that schema's fields and measures.
+ * The starting dashboard: a finished temperature page, an unfinished precipitation page for an
+ * agent to complete, and a blank page. Widgets reference fields and measures from `weatherData.ts`.
  */
-
-/** An empty canvas: one page, no widgets. For examples whose point is that the assistant
- * builds the dashboard from nothing. */
-export const ghcnCitiesBlankState: AgReportState = {
-    pages: [{ id: 'main', widgets: {}, widgetLayout: {} }],
-    selectedPageId: 'main',
-    panels: {
-        filters: { collapsed: true },
-        edit: { collapsed: true },
-        data: { collapsed: true },
-    },
-};
-
-/**
- * A three-page weather report: a finished temperature page, a deliberately unfinished
- * precipitation page for the assistant to complete, and a blank page to build on. For
- * examples that need existing widgets to read, edit or reason about.
- */
-export const ghcnCitiesReportState: AgReportState = {
+export const weatherReport: AgReportState = {
     pages: [
         // Page 1: a complete, titled temperature report.
         {
@@ -131,7 +111,7 @@ export const ghcnCitiesReportState: AgReportState = {
             },
             filter: { page: [] },
         },
-        // Page 2: a deliberately unfinished precipitation report for the AI to complete.
+        // Page 2: a deliberately unfinished precipitation report.
         {
             id: 'precipitation',
             widgets: {
@@ -193,7 +173,6 @@ export const ghcnCitiesReportState: AgReportState = {
     ],
     selectedPageId: 'temperature',
     panels: {
-        ai: { collapsed: false },
         filters: { collapsed: false },
         edit: { collapsed: true },
         data: { collapsed: true },

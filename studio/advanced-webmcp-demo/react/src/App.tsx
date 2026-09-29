@@ -2,19 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 
 import './App.css';
 import { WebMcpPanel } from './components/WebMcpPanel.tsx';
-import type { WebMcpSnapshot } from './studioWebMcp.ts';
-import { mountStudioWebMcp } from './studioWebMcp.ts';
+import type { WebMcpSnapshot } from './studio/mountStudio.ts';
+import { mountStudio } from './studio/mountStudio.ts';
 
-function App() {
+export default function App() {
     const studioRef = useRef<HTMLDivElement>(null);
     const [snapshot, setSnapshot] = useState<WebMcpSnapshot>();
 
     useEffect(() => {
-        const studio = mountStudioWebMcp(studioRef.current!);
-        const unsubscribe = studio.subscribe(setSnapshot);
+        const studio = mountStudio(studioRef.current!);
         setSnapshot(studio.getSnapshot());
-        // StrictMode mounts twice in development, so tearing down fully here matters: a leftover
-        // instance would keep its tools registered with the browser.
+        const unsubscribe = studio.subscribe(setSnapshot);
+        // Tear down fully: a leftover instance would keep its tools registered with the browser.
         return () => {
             unsubscribe();
             studio.destroy();
@@ -28,5 +27,3 @@ function App() {
         </div>
     );
 }
-
-export default App;
