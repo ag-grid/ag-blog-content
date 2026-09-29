@@ -1,0 +1,73 @@
+.app {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    height: 100%;
+}
+
+.studio {
+    min-width: 0;
+    height: 100%;
+}
+
+.webmcp-panel {
+    overflow-y: auto;
+    padding: 16px;
+    border-left: 1px solid #e2e4e8;
+    background: #f8f9fb;
+    font-size: 13px;
+}
+
+.webmcp-panel h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+}
+
+.webmcp-panel h3 {
+    margin: 16px 0 6px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #5b6270;
+}
+
+.status {
+    margin: 4px 0;
+}
+
+.status.ok {
+    color: #1a7f37;
+}
+
+.status.warn {
+    color: #9a6700;
+}
+
+.status.error {
+    color: #cf222e;
+}
+
+.muted {
+    color: #8b919c;
+}
+
+.tools,
+.log {
+    margin: 0;
+    padding-left: 18px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+}
+
+.tools li,
+.log li {
+    padding: 1px 0;
+    word-break: break-all;
+}
+
+.badge {
+    margin-left: 6px;
+    padding: 0 4px;
+    border-radius: 3px;
+    background: #dde3ec;
+    font-size: 10px;
+}
