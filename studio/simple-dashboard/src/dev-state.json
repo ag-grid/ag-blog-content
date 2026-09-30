@@ -4,52 +4,40 @@
             "id": "page-2",
             "widgetLayout": {
                 "73": {
-                    "xTrack": 3,
-                    "yTrack": 4,
-                    "xSpan": 7,
+                    "xTrack": 0,
+                    "yTrack": 5,
+                    "xSpan": 12,
                     "ySpan": 6
                 },
                 "74": {
-                    "xTrack": 10,
-                    "yTrack": 4,
-                    "xSpan": 7,
+                    "xTrack": 12,
+                    "yTrack": 5,
+                    "xSpan": 12,
                     "ySpan": 6
-                },
-                "75": {
-                    "xTrack": 17,
-                    "yTrack": 4,
-                    "xSpan": 7,
-                    "ySpan": 6
-                },
-                "76": {
-                    "xTrack": 0,
-                    "yTrack": 4,
-                    "xSpan": 3,
-                    "ySpan": 56
-                },
-                "77": {
-                    "xTrack": 3,
-                    "yTrack": 10,
-                    "xSpan": 7,
-                    "ySpan": 25
                 },
                 "78": {
-                    "xTrack": 10,
-                    "yTrack": 10,
-                    "xSpan": 14,
+                    "xTrack": 0,
+                    "yTrack": 11,
+                    "xSpan": 24,
                     "ySpan": 25
                 },
                 "79": {
-                    "xTrack": 3,
-                    "yTrack": 35,
-                    "xSpan": 21,
-                    "ySpan": 25
+                    "xTrack": 0,
+                    "yTrack": 36,
+                    "xSpan": 24,
+                    "ySpan": 24
                 },
                 "80": {
                     "xTrack": 0,
                     "yTrack": 0,
-                    "xSpan": 24,
-                    "ySpan": 4
+                    "xSpan": 11,
+                    "ySpan": 5
+                },
+                "82": {
+                    "xTrack": 11,
+                    "yTrack": 0,
+                    "xSpan": 13,
+                    "ySpan": 5
                 }
             },
             "widgets": {
@@ -89,73 +77,6 @@
                         }
                     }
                 },
-                "75": {
-                    "type": "value",
-                    "dataMapping": {
-                        "value": [
-                            {
-                                "id": "expression-7::number"
-                            }
-                        ],
-                        "sparklineX": []
-                    },
-                    "format": {
-                        "title": {
-                            "enabled": true,
-                            "text": "Total units accepted"
-                        }
-                    }
-                },
-                "76": {
-                    "type": "list-filter",
-                    "dataMapping": {
-                        "value": [
-                            {
-                                "id": "materials.category"
-                            }
-                        ]
-                    },
-                    "format": {
-                        "style": {
-                            "selection": {
-                                "type": "single"
-                            }
-                        }
-                    }
-                },
-                "77": {
-                    "type": "donut-chart",
-                    "dataMapping": {
-                        "categoryKey": [
-                            {
-                                "id": "suppliers.name"
-                            }
-                        ],
-                        "valueKey": [
-                            {
-                                "id": "expression-6::number",
-                                "aggregation": "sum"
-                            }
-                        ],
-                        "tooltipKey": []
-                    },
-                    "format": {
-                        "style": {
-                            "custom": {
-                                "totalLabel": {
-                                    "enabled": true
-                                },
-                                "pieDataLabel": {
-                                    "enabled": true
-                                }
-                            }
-                        },
-                        "title": {
-                            "enabled": true,
-                            "text": "Spend breakdown by supplier"
-                        }
-                    }
-                },
                 "78": {
                     "type": "column-chart-stacked",
                     "dataMapping": {
@@ -171,33 +92,33 @@
                             }
                         ],
                         "tooltipKey": [],
-                        "legendKey": [
-                            {
-                                "id": "materials.subcategory"
-                            }
-                        ]
+                        "legendKey": []
                     },
                     "format": {
+                        "title": {
+                            "enabled": true,
+                            "text": "Spend trend by material"
+                        },
                         "style": {
+                            "custom": {
+                                "valueAxis": {
+                                    "title": {
+                                        "enabled": true,
+                                        "text": "Spend amount ($)",
+                                        "fontFamily": "\"DM Sans\", sans-serif",
+                                        "fontSize": 12,
+                                        "fontWeight": "normal",
+                                        "fontStyle": "normal"
+                                    }
+                                }
+                            },
                             "theme": {
                                 "common": {
                                     "legend": {
                                         "enabled": true
                                     }
                                 }
-                            },
-                            "custom": {
-                                "valueAxis": {
-                                    "title": {
-                                        "enabled": true,
-                                        "text": "Spend amount ($)"
-                                    }
-                                }
                             }
-                        },
-                        "title": {
-                            "enabled": true,
-                            "text": "Spend trend by material"
                         }
                     }
                 },
@@ -228,44 +149,34 @@
                         ],
                         "columns": []
                     },
-                    "format": {
-                        "title": {
-                            "enabled": false,
-                            "text": ""
-                        }
-                    }
+                    "format": {}
                 },
                 "80": {
                     "type": "text",
                     "dataMapping": {},
                     "format": {
-                        "title": {
-                            "enabled": false,
+                        "style": {
                             "text": "Spend overview"
                         },
-                        "style": {
-                            "text": "Spend overview",
-                            "textAlign": "center"
+                        "title": {
+                            "text": "Spend overview"
                         }
                     }
+                },
+                "82": {
+                    "type": "date-filter",
+                    "dataMapping": {
+                        "value": [
+                            {
+                                "id": "purchase-orders.orderDate"
+                            }
+                        ]
+                    },
+                    "format": {}
                 }
             },
             "filter": {
-                "page": [
-                    {
-                        "field": {
-                            "id": "materials.category"
-                        },
-                        "view": {},
-                        "model": {
-                            "operator": "isIn",
-                            "value": [
-                                "Steel & Metals"
-                            ]
-                        },
-                        "filterWidgetId": "76"
-                    }
-                ],
+                "page": [],
                 "widget": {
                     "59": [],
                     "70": [],
@@ -274,6 +185,10 @@
                     "75": [],
                     "76": []
                 }
+            },
+            "selection": {
+                "type": "widget",
+                "id": "79"
             }
         }
     ],
