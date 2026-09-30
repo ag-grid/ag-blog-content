@@ -15,7 +15,7 @@ import { createHandoffTool } from '../webmcp/handoffTool.ts';
 import { createMetaTools } from '../webmcp/metaTools.ts';
 import type { ToolCatalogue, ToolListing } from '../webmcp/toolCatalogue.ts';
 import { createToolCatalogue } from '../webmcp/toolCatalogue.ts';
-import type { PublishedTool, WebMcpBridge } from '../webmcp/webmcpBridge.ts';
+import type { PublishedTool, ToolCallOutcome, WebMcpBridge } from '../webmcp/webmcpBridge.ts';
 import { createWebMcpBridge } from '../webmcp/webmcpBridge.ts';
 
 if (import.meta.env.DEV) {
@@ -24,17 +24,29 @@ if (import.meta.env.DEV) {
 
 AgStudioModuleRegistry.registerModules([AgStudioAiModule]);
 
-// The AG AI proxy accepts the blog's origin without a key; on localhost, vite.config.ts supplies a
-// dev key. An empty URL switches the analyst handoff off.
-const AI_API_URL = import.meta.env.VITE_AI_API_URL ?? 'https://ai-api.ag-grid.com/api/openai/v1';
-const AI_API_TOKEN = import.meta.env.VITE_AI_API_TOKEN || undefined;
+// See the README for setting these. Without a URL the analyst handoff is switched off.
+const AI_API_URL = import.meta.env.AI_API_URL;
+const AI_API_TOKEN = import.meta.env.AI_API_TOKEN || undefined;
 const ASSETS_BASE_URL = import.meta.env.VITE_ASSETS_BASE_URL ?? '';
 
 const MAX_LOG_ENTRIES = 20;
+const MAX_LOG_TEXT = 100;
 
 export interface LogEntry {
     id: number;
     text: string;
+    /** Set for tool calls; plain notes have none. */
+    status?: 'running' | 'ok' | 'error';
+    /** The call's result summary, once it has finished. */
+    detail?: string;
+}
+
+function truncate(text: string, max = MAX_LOG_TEXT): string {
+    return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+function describeCall(name: string, args: Record<string, unknown>): string {
+    return truncate(`${name}(${Object.keys(args).length > 0 ? JSON.stringify(args) : ''})`);
 }
 
 /** What the demo panel shows about the WebMCP bridge. */
@@ -80,9 +92,25 @@ export function mountStudio(container: HTMLElement): MountedStudio {
         listeners.forEach((listener) => listener(snapshot));
     }
 
-    function addLog(text: string): void {
-        log = [...log, { id: nextLogId++, text }].slice(-MAX_LOG_ENTRIES);
+    function addLog(entry: Omit<LogEntry, 'id'>): number {
+        const id = nextLogId++;
+        log = [...log, { id, ...entry }].slice(-MAX_LOG_ENTRIES);
         emit();
+        return id;
+    }
+
+    function updateLog(id: number, changes: Partial<LogEntry>): void {
+        log = log.map((entry) => (entry.id === id ? { ...entry, ...changes } : entry));
+        emit();
+    }
+
+    const addNote = (text: string): void => void addLog({ text });
+
+    /** Logs a tool call as it starts, and fills in its outcome when it finishes. */
+    function logCall(name: string, args: Record<string, unknown>): (outcome: ToolCallOutcome) => void {
+        const id = addLog({ text: describeCall(name, args), status: 'running' });
+        return ({ ok, summary }) =>
+            updateLog(id, { status: ok ? 'ok' : 'error', detail: truncate(summary.split('\n')[0]) });
     }
 
     async function reconcile(): Promise<void> {
@@ -99,7 +127,7 @@ export function mountStudio(container: HTMLElement): MountedStudio {
 
     function onStudioReady(api: AgStudioApi): void {
         const toolCatalogue = createToolCatalogue(api, api.getAiTools());
-        toolCatalogue.pin(createMetaTools({ api, catalogue: toolCatalogue, reconcile, log: addLog }));
+        toolCatalogue.pin(createMetaTools({ api, catalogue: toolCatalogue, reconcile }));
 
         if (AI_API_URL !== '') {
             try {
@@ -108,14 +136,14 @@ export function mountStudio(container: HTMLElement): MountedStudio {
                 const harness = createAiHarness(api, {
                     adapter: openaiAdapter({ endpoint: AI_API_URL, key: AI_API_TOKEN }),
                 });
-                toolCatalogue.pin([createHandoffTool({ api, harness, log: addLog })]);
+                toolCatalogue.pin([createHandoffTool({ api, harness, log: addNote })]);
             } catch (err) {
                 error = `Could not create the analyst: ${errorMessage(err)}`;
             }
         }
 
         catalogue = toolCatalogue;
-        bridge = createWebMcpBridge(() => toolCatalogue.published());
+        bridge = createWebMcpBridge(() => toolCatalogue.published(), { onCall: logCall });
         void reconcile();
     }
 
@@ -130,8 +158,9 @@ export function mountStudio(container: HTMLElement): MountedStudio {
         onStudioPreDestroyed: () => bridge?.destroy(),
     };
 
-    const onToolChange = (): void => addLog('browser reported toolchange');
-    document.modelContext?.addEventListener('toolchange', onToolChange);
+    // Not every WebMCP browser fires `toolchange`; the log entry is informational only.
+    const onToolChange = (): void => addNote('browser reported toolchange');
+    document.modelContext?.addEventListener?.('toolchange', onToolChange);
 
     const studioApi = createStudio(container, properties);
 
@@ -142,7 +171,7 @@ export function mountStudio(container: HTMLElement): MountedStudio {
         },
         getSnapshot: () => snapshot,
         destroy() {
-            document.modelContext?.removeEventListener('toolchange', onToolChange);
+            document.modelContext?.removeEventListener?.('toolchange', onToolChange);
             listeners.clear();
             studioApi.destroy();
         },

@@ -5,6 +5,7 @@ import type { BridgedTool } from './webmcpBridge.ts';
 export interface HandoffToolDeps {
     api: AgStudioApi;
     harness: AgAiHarness;
+    /** Records what the delegated run did, alongside the call's own log entry. */
     log(line: string): void;
 }
 
@@ -85,13 +86,12 @@ export function createHandoffTool({ api, harness, log }: HandoffToolDeps): Bridg
             'data contains or shows, rather than querying field by field.',
         params: (s) => s.object({ question: s.string({ description: 'The question, in plain language.' }) }),
         execute: async ({ question }, ctx) => {
-            log(`ask_studio_analyst: ${question}`);
             const session = await harness.createThread({ agentId: 'data', title: 'Asked via WebMCP' });
             try {
                 session.sendMessage(question);
                 const outcome = await runSettled(session, ctx.signal);
                 const calls = toolCallNames(session);
-                log(`analyst ${outcome}, tool calls: ${calls.join(', ') || 'none'}`);
+                log(`analyst ${outcome}, ran: ${calls.join(', ') || 'no tools'}`);
 
                 const answer = lastAssistantText(session);
                 if (outcome === 'timeout') return ctx.error('The analyst did not finish in time and was cancelled.');

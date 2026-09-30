@@ -20,7 +20,7 @@ export function WebMcpPanel({ snapshot }: WebMcpPanelProps) {
                     This browser has no WebMCP support, so nothing is published. Bookkeeping still runs.
                 </p>
             )}
-            {!handoffEnabled && <p className="status muted">No AI endpoint set, so ask_studio_analyst is off.</p>}
+            {!handoffEnabled && <p className="status muted">AI_API_URL is not set, so ask_studio_analyst is off.</p>}
             {error && <p className="status error">{error}</p>}
 
             <h3>Published ({published.length})</h3>
@@ -45,8 +45,12 @@ export function WebMcpPanel({ snapshot }: WebMcpPanelProps) {
                 <p className="status muted">No calls yet.</p>
             ) : (
                 <ol className="log">
-                    {log.map(({ id, text }) => (
-                        <li key={id}>{text}</li>
+                    {log.map(({ id, text, status, detail }) => (
+                        <li key={id} className={status}>
+                            {text}
+                            {status === 'running' && <span className="log-detail">running…</span>}
+                            {detail && <span className="log-detail">{detail}</span>}
+                        </li>
                     ))}
                 </ol>
             )}

@@ -71,3 +71,12 @@
     background: #dde3ec;
     font-size: 10px;
 }
+
+.log li.error {
+    color: #cf222e;
+}
+
+.log-detail {
+    display: block;
+    color: #8b919c;
+}

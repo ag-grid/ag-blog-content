@@ -8,7 +8,6 @@ export interface MetaToolDeps {
     catalogue: ToolCatalogue;
     /** Runs a reconcile pass, so newly registered tools exist before the call returns. */
     reconcile(): Promise<void>;
-    log(line: string): void;
 }
 
 /**
@@ -44,7 +43,7 @@ function describeChange(verb: string, { accepted, refused = [], unknown }: Chang
  * tool is called as itself, so the browser validates arguments against its real schema and sees its
  * real `readOnlyHint`. The cost is that an agent must register a tool before calling it.
  */
-export function createMetaTools({ api, catalogue, reconcile, log }: MetaToolDeps): BridgedTool[] {
+export function createMetaTools({ api, catalogue, reconcile }: MetaToolDeps): BridgedTool[] {
     const viewLibrary = api.defineAiTool({
         name: 'view_tool_library',
         description:
@@ -53,7 +52,6 @@ export function createMetaTools({ api, catalogue, reconcile, log }: MetaToolDeps
             'limits how much one page may publish. Take what you need with register_studio_tools.',
         params: (s) => s.object({ search: s.string({ description: 'Optional substring filter.' }).optional() }),
         execute: ({ search }, ctx) => {
-            log(`view_tool_library(${search ?? ''})`);
             const term = search?.toLowerCase();
             const listings = catalogue
                 .list()
@@ -78,7 +76,6 @@ export function createMetaTools({ api, catalogue, reconcile, log }: MetaToolDeps
             'carry large schemas. Refresh your tool list afterwards to see them.',
         params: (s) => s.object({ names: s.array(s.string(), { description: 'Tool names to register.' }) }),
         execute: async ({ names }, ctx) => {
-            log(`register_studio_tools(${names.join(', ')})`);
             const result = catalogue.register(names);
             await reconcile();
             return ctx.success(describeChange('Registered', result));
@@ -92,7 +89,6 @@ export function createMetaTools({ api, catalogue, reconcile, log }: MetaToolDeps
             'cannot be withdrawn. Refresh your tool list afterwards.',
         params: (s) => s.object({ names: s.array(s.string(), { description: 'Tool names to withdraw.' }) }),
         execute: async ({ names }, ctx) => {
-            log(`unregister_studio_tools(${names.join(', ')})`);
             const result = catalogue.unregister(names);
             await reconcile();
             return ctx.success(describeChange('Unregistered', result));

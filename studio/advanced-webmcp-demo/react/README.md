@@ -11,11 +11,41 @@ npm install
 npm run dev
 ```
 
-The `ask_studio_analyst` tool talks to the AG AI proxy, which accepts requests from
-`blog.ag-grid.com` without a key. On localhost, export `AG_AI_API_DEV_TOKEN` and the dev server
-passes it through. Production builds never include it (see `vite.config.ts`).
-
 In a browser without WebMCP the demo still runs, and the side panel shows what would be published.
+
+## Connecting an LLM
+
+The `ask_studio_analyst` tool needs an OpenAI-compatible
+[Responses API](https://platform.openai.com/docs/api-reference/responses). Everything else works
+without one. Configure it with two environment variables:
+
+| Variable       | Purpose                                                       |
+| -------------- | ------------------------------------------------------------- |
+| `AI_API_URL`   | Base URL of the API, e.g. `https://api.openai.com/v1`.        |
+| `AI_API_TOKEN` | API key, sent as a Bearer token. Used by the dev server only. |
+
+Either copy `.env.example` to `.env.local` (gitignored) and fill it in:
+
+```sh
+AI_API_URL=https://api.openai.com/v1
+AI_API_TOKEN=sk-...
+```
+
+or export them from your shell before running `npm run dev`:
+
+```sh
+export AI_API_URL=https://api.openai.com/v1
+export AI_API_TOKEN=sk-...
+```
+
+The model defaults to `gpt-5.4-mini`; change it in `src/studio/mountStudio.ts` by passing `model`
+to `openaiAdapter`.
+
+### Deploying
+
+`npm run build` never includes `AI_API_TOKEN`, because anything in the bundle can be read by every
+visitor. To keep the analyst working on a deployed page, set `AI_API_URL` at build time to a proxy
+that adds the key on the server side.
 
 ## How it works
 

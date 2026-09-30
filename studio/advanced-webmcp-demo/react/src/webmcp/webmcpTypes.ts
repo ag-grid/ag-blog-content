@@ -20,11 +20,15 @@ export interface WebMcpToolDescriptor {
     execute(args: Record<string, unknown>): Promise<WebMcpToolResult>;
 }
 
+/**
+ * Browsers implement different subsets of the API: ChatGPT's built-in browser, for one, provides
+ * `registerTool` but is not an event target. Only `registerTool` is assumed.
+ */
 export interface WebMcpModelContext {
     /** Registers a tool until `signal` is aborted. */
     registerTool(descriptor: WebMcpToolDescriptor, options?: { signal?: AbortSignal }): Promise<void>;
-    addEventListener(type: 'toolchange', listener: () => void): void;
-    removeEventListener(type: 'toolchange', listener: () => void): void;
+    addEventListener?(type: 'toolchange', listener: () => void): void;
+    removeEventListener?(type: 'toolchange', listener: () => void): void;
 }
 
 declare global {

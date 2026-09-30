@@ -19,6 +19,17 @@ export interface PublishedTool {
     registrations: number;
 }
 
+/** How a tool call ended. `summary` is the first part of the result, or the error. */
+export interface ToolCallOutcome {
+    ok: boolean;
+    summary: string;
+}
+
+export interface WebMcpBridgeOptions {
+    /** Called as each tool call starts. The returned function receives the call's outcome. */
+    onCall?(name: string, args: Record<string, unknown>): (outcome: ToolCallOutcome) => void;
+}
+
 export interface WebMcpBridge {
     /** Brings the browser's registrations in line with the current tools. Passes run one at a time. */
     reconcile(): Promise<void>;
@@ -35,9 +46,10 @@ interface Registration {
     count: number;
 }
 
-const textResult = (...parts: string[]): WebMcpToolResult => ({
-    content: parts.map((text) => ({ type: 'text', text })),
-});
+interface CallResult {
+    ok: boolean;
+    parts: string[];
+}
 
 /**
  * Publishes Studio AI tools to the browser through WebMCP. `getTools` is read on every pass, so
@@ -46,7 +58,10 @@ const textResult = (...parts: string[]): WebMcpToolResult => ({
  * Without WebMCP support the bridge still keeps its bookkeeping, so the demo panel shows what
  * would have been published.
  */
-export function createWebMcpBridge(getTools: () => readonly BridgedTool[]): WebMcpBridge {
+export function createWebMcpBridge(
+    getTools: () => readonly BridgedTool[],
+    { onCall }: WebMcpBridgeOptions = {}
+): WebMcpBridge {
     const modelContext = document.modelContext;
     const registrations = new Map<string, Registration>();
     let queue = Promise.resolve();
@@ -54,9 +69,9 @@ export function createWebMcpBridge(getTools: () => readonly BridgedTool[]): WebM
     let destroyed = false;
     let callCount = 0;
 
-    async function execute(tool: AgAiTool, args: Record<string, unknown>): Promise<WebMcpToolResult> {
+    async function run(tool: AgAiTool, args: Record<string, unknown>): Promise<CallResult> {
         if (tool.execute == null) {
-            return textResult(`${tool.name} cannot be run in the browser.`);
+            return { ok: false, parts: [`${tool.name} cannot be run in the browser.`] };
         }
         const id = ++callCount;
         try {
@@ -65,16 +80,27 @@ export function createWebMcpBridge(getTools: () => readonly BridgedTool[]): WebM
                 createAiToolContext({ run: { threadId: 'webmcp', runId: `webmcp-run-${id}` } })
             );
             if (!result.success) {
-                return textResult(result.issues.map((issue) => issue.message).join('; '));
+                return { ok: false, parts: [result.issues.map((issue) => issue.message).join('; ')] };
             }
             // `response` is a one-line summary; `data` carries the substance (a widget's config, a
             // query's rows). The agent needs both.
-            return result.data === undefined
-                ? textResult(result.response)
-                : textResult(result.response, JSON.stringify(result.data, null, 2));
+            return {
+                ok: true,
+                parts:
+                    result.data === undefined
+                        ? [result.response]
+                        : [result.response, JSON.stringify(result.data, null, 2)],
+            };
         } catch (err) {
-            return textResult(`${tool.name} failed: ${errorMessage(err)}`);
+            return { ok: false, parts: [`${tool.name} failed: ${errorMessage(err)}`] };
         }
+    }
+
+    async function execute(tool: AgAiTool, args: Record<string, unknown>): Promise<WebMcpToolResult> {
+        const finish = onCall?.(tool.name, args);
+        const { ok, parts } = await run(tool, args);
+        finish?.({ ok, summary: parts[0] });
+        return { content: parts.map((text) => ({ type: 'text', text })) };
     }
 
     function withdraw(name: string): void {
