@@ -27,7 +27,10 @@ AgStudioModuleRegistry.registerModules([AgStudioAiModule]);
 // See the README for setting these. Without a URL the analyst handoff is switched off.
 const AI_API_URL = import.meta.env.AI_API_URL;
 const AI_API_TOKEN = import.meta.env.AI_API_TOKEN || undefined;
-const ASSETS_BASE_URL = import.meta.env.VITE_ASSETS_BASE_URL ?? '';
+// Defaults to the folder the page is served from, so the build works under any sub-path.
+const ASSETS_BASE_URL = (
+    import.meta.env.VITE_ASSETS_BASE_URL || new URL(import.meta.env.BASE_URL, document.baseURI).href
+).replace(/\/$/, '');
 
 const MAX_LOG_ENTRIES = 20;
 const MAX_LOG_TEXT = 100;
