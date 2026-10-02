@@ -1,0 +1,17 @@
+/* AG Studio fills the size of its parent, so give the page a full-viewport
+   layout with no default margins. */
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family:
+        system-ui,
+        -apple-system,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
+}
