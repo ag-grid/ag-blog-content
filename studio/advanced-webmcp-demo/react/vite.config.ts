@@ -7,7 +7,7 @@ export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
 
     return {
-        base: '/dist/',
+        base: './',
         plugins: [react()],
         define: {
             'import.meta.env.AI_API_URL': JSON.stringify(env.AI_API_URL ?? ''),
