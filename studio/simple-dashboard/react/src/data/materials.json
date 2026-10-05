@@ -1,0 +1,242 @@
+[
+    {
+        "materialId": "CC-A-01",
+        "name": "Hot Melt Adhesive",
+        "category": "Chemicals & Coatings",
+        "subcategory": "Adhesives"
+    },
+    {
+        "materialId": "CC-A-02",
+        "name": "Structural Adhesive",
+        "category": "Chemicals & Coatings",
+        "subcategory": "Adhesives"
+    },
+    {
+        "materialId": "CC-P-01",
+        "name": "Powder Coating",
+        "category": "Chemicals & Coatings",
+        "subcategory": "Paints"
+    },
+    {
+        "materialId": "CC-P-02",
+        "name": "Primer",
+        "category": "Chemicals & Coatings",
+        "subcategory": "Paints"
+    },
+    {
+        "materialId": "CC-S-01",
+        "name": "Degreaser",
+        "category": "Chemicals & Coatings",
+        "subcategory": "Solvents"
+    },
+    {
+        "materialId": "CC-S-02",
+        "name": "Industrial Solvent",
+        "category": "Chemicals & Coatings",
+        "subcategory": "Solvents"
+    },
+    {
+        "materialId": "EC-C-01",
+        "name": "Board Connectors",
+        "category": "Electronics & Components",
+        "subcategory": "Connectors"
+    },
+    {
+        "materialId": "EC-C-02",
+        "name": "Wire Harnesses",
+        "category": "Electronics & Components",
+        "subcategory": "Connectors"
+    },
+    {
+        "materialId": "EC-P-01",
+        "name": "4-Layer PCB",
+        "category": "Electronics & Components",
+        "subcategory": "PCBs"
+    },
+    {
+        "materialId": "EC-P-02",
+        "name": "Flex PCB",
+        "category": "Electronics & Components",
+        "subcategory": "PCBs"
+    },
+    {
+        "materialId": "EC-PC-01",
+        "name": "Capacitors",
+        "category": "Electronics & Components",
+        "subcategory": "Passive Components"
+    },
+    {
+        "materialId": "EC-PC-02",
+        "name": "Inductors",
+        "category": "Electronics & Components",
+        "subcategory": "Passive Components"
+    },
+    {
+        "materialId": "EC-PC-03",
+        "name": "Resistors",
+        "category": "Electronics & Components",
+        "subcategory": "Passive Components"
+    },
+    {
+        "materialId": "EC-S-01",
+        "name": "Microcontrollers",
+        "category": "Electronics & Components",
+        "subcategory": "Semiconductors"
+    },
+    {
+        "materialId": "EC-S-02",
+        "name": "Power ICs",
+        "category": "Electronics & Components",
+        "subcategory": "Semiconductors"
+    },
+    {
+        "materialId": "EC-S-03",
+        "name": "Sensors",
+        "category": "Electronics & Components",
+        "subcategory": "Semiconductors"
+    },
+    {
+        "materialId": "FH-F-01",
+        "name": "Hex Bolts",
+        "category": "Fasteners & Hardware",
+        "subcategory": "Fasteners"
+    },
+    {
+        "materialId": "FH-F-02",
+        "name": "Machine Screws",
+        "category": "Fasteners & Hardware",
+        "subcategory": "Fasteners"
+    },
+    {
+        "materialId": "FH-F-03",
+        "name": "Rivets",
+        "category": "Fasteners & Hardware",
+        "subcategory": "Fasteners"
+    },
+    {
+        "materialId": "PM-C-01",
+        "name": "Corner Board",
+        "category": "Packaging Materials",
+        "subcategory": "Corrugate"
+    },
+    {
+        "materialId": "PM-C-02",
+        "name": "Corrugated Cases",
+        "category": "Packaging Materials",
+        "subcategory": "Corrugate"
+    },
+    {
+        "materialId": "PM-L-01",
+        "name": "RFID Labels",
+        "category": "Packaging Materials",
+        "subcategory": "Labels"
+    },
+    {
+        "materialId": "PM-L-02",
+        "name": "Thermal Labels",
+        "category": "Packaging Materials",
+        "subcategory": "Labels"
+    },
+    {
+        "materialId": "PM-P-01",
+        "name": "Plastic Pallets",
+        "category": "Packaging Materials",
+        "subcategory": "Pallets"
+    },
+    {
+        "materialId": "PM-P-02",
+        "name": "Wood Pallets",
+        "category": "Packaging Materials",
+        "subcategory": "Pallets"
+    },
+    {
+        "materialId": "PP-EP-01",
+        "name": "Nylon 66",
+        "category": "Plastics & Polymers",
+        "subcategory": "Engineered Plastics"
+    },
+    {
+        "materialId": "PP-EP-02",
+        "name": "Polycarbonate",
+        "category": "Plastics & Polymers",
+        "subcategory": "Engineered Plastics"
+    },
+    {
+        "materialId": "PP-F-01",
+        "name": "Barrier Film",
+        "category": "Plastics & Polymers",
+        "subcategory": "Films"
+    },
+    {
+        "materialId": "PP-F-02",
+        "name": "PET Film",
+        "category": "Plastics & Polymers",
+        "subcategory": "Films"
+    },
+    {
+        "materialId": "PP-R-01",
+        "name": "ABS Resin",
+        "category": "Plastics & Polymers",
+        "subcategory": "Resins"
+    },
+    {
+        "materialId": "PP-R-02",
+        "name": "Polypropylene Resin",
+        "category": "Plastics & Polymers",
+        "subcategory": "Resins"
+    },
+    {
+        "materialId": "SM-CS-01",
+        "name": "Cold-Rolled Coil",
+        "category": "Steel & Metals",
+        "subcategory": "Carbon Steel"
+    },
+    {
+        "materialId": "SM-CS-02",
+        "name": "Hot-Rolled Coil",
+        "category": "Steel & Metals",
+        "subcategory": "Carbon Steel"
+    },
+    {
+        "materialId": "SM-CS-03",
+        "name": "Steel Plate",
+        "category": "Steel & Metals",
+        "subcategory": "Carbon Steel"
+    },
+    {
+        "materialId": "SM-GS-01",
+        "name": "Galvanized Sheet",
+        "category": "Steel & Metals",
+        "subcategory": "Galvanized Steel"
+    },
+    {
+        "materialId": "SM-GS-02",
+        "name": "Galvannealed Coil",
+        "category": "Steel & Metals",
+        "subcategory": "Galvanized Steel"
+    },
+    {
+        "materialId": "SM-SA-01",
+        "name": "Nickel Alloy",
+        "category": "Steel & Metals",
+        "subcategory": "Specialty Alloys"
+    },
+    {
+        "materialId": "SM-SA-02",
+        "name": "Titanium Alloy",
+        "category": "Steel & Metals",
+        "subcategory": "Specialty Alloys"
+    },
+    {
+        "materialId": "SM-SS-01",
+        "name": "304 Stainless Sheet",
+        "category": "Steel & Metals",
+        "subcategory": "Stainless Steel"
+    },
+    {
+        "materialId": "SM-SS-02",
+        "name": "316 Stainless Bar",
+        "category": "Steel & Metals",
+        "subcategory": "Stainless Steel"
+    }
+]
